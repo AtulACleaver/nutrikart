@@ -4,6 +4,7 @@ import 'package:nutrikart/repository/screens/login/loginscreen.dart';
 // ignore: unused_import
 import 'package:nutrikart/domain/constraints/appcolors.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class SplashScreen extends StatefulWidget {
 
@@ -16,10 +17,8 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     Timer(Duration(seconds: 3), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
-      );
+      // Navigate to home screen instead of login for now
+      context.go('/home');
     });
   }
 

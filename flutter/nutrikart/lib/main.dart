@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:nutrikart/features/search/search_page.dart';
-import 'package:nutrikart/repository/screens/splash/splashscreen.dart';
+import 'package:nutrikart/core/router/app_router.dart';
 
 void main() {
   // Wrap the entire app in ProviderScope to enable Riverpod
@@ -13,20 +12,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'NutriKart',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: false,
       ),
-
-      // 👇 Start with your existing splash screen
-      home: SplashScreen(),
-
-      // 👇 Optional: Define routes for easy navigation
-      routes: {
-        '/search': (context) => const SearchPage(),
-      },
+      routerConfig: appRouter,
     );
   }
 }

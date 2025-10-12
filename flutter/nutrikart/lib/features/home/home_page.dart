@@ -3,6 +3,7 @@ import 'package:nutrikart/core/widgets/category_card.dart';
 import 'package:nutrikart/core/widgets/diet_preference_chip.dart';
 import 'package:nutrikart/core/widgets/product_card.dart';
 import 'package:nutrikart/core/widgets/bottom_nav_bar.dart';
+import 'package:go_router/go_router.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -50,17 +51,26 @@ class HomePage extends StatelessWidget {
               const SizedBox(height: 20),
 
               // 🔍 Search Bar
-              TextField(
-                decoration: InputDecoration(
-                  hintText: "Search for groceries...",
-                  prefixIcon: const Icon(Icons.search),
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-                  border: OutlineInputBorder(
+              GestureDetector(
+                onTap: () {
+                  // Navigate to search page
+                  context.push('/search');
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none,
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.search, color: Colors.grey),
+                      const SizedBox(width: 12),
+                      Text(
+                        "Search for groceries...",
+                        style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+                      ),
+                    ],
                   ),
                 ),
               ),
