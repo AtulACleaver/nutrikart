@@ -4,13 +4,36 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 
 class ApiService {
-  static const String _baseUrl = 'http://127.0.0.1:8000';
+  // Base host can be overridden at build time using
+  // --dart-define=API_HOST=your_host (e.g. 192.168.0.10)
+  // For development the default is localhost (127.0.0.1).
+  // On Android emulators, use 10.0.2.2 to reach host machine.
+  static const String _defaultHost = String.fromEnvironment('API_HOST', defaultValue: '127.0.0.1');
   static const Duration _timeout = Duration(seconds: 10);
-  
+
   late final http.Client _client;
-  
+  late final String _baseUrl;
+
   ApiService() {
     _client = http.Client();
+    _baseUrl = _computeBaseUrl();
+  }
+
+  String _computeBaseUrl() {
+    final host = _defaultHost;
+    // Web uses direct host
+    if (kIsWeb) return 'http://$host:8000';
+    // Android emulator mapping
+    try {
+      if (Platform.isAndroid) {
+        final mapped = (host == '127.0.0.1' || host == 'localhost') ? '10.0.2.2' : host;
+        return 'http://$mapped:8000';
+      }
+    } catch (_) {
+      // Platform not supported in this environment; fall through
+    }
+    // iOS simulator and desktop use localhost directly
+    return 'http://$host:8000';
   }
   
   // Helper method to handle HTTP responses
