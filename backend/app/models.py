@@ -1,17 +1,27 @@
 # In models.py: Define the Product model class with all fields from your schema
 
-from sqlalchemy import Column, Integer, String, Numeric, Text, DateTime
-from sqlalchemy.sql import func
-from .database import Base
+from sqlalchemy import Column, Integer, String, Numeric, Text
+from .database import ProductsBase, CategoriesBase
 
-class Product(Base):
+class Product(ProductsBase):
     __tablename__ = "products"
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
-    description = Column(Text)
-    price = Column(Numeric(10, 2), nullable=False)
-    stock_quantity = Column(Integer, default=0)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    # category_id is now a simple Integer as it refers to a table in another database
+    category_id = Column(Integer)
+    price_per_unit = Column(Numeric(10, 2))
+    serving_size = Column(Numeric(6, 2))
+    calories = Column(Numeric(6, 2))
+    sugar = Column(Numeric(6, 2))
+    sodium = Column(Numeric(6, 2))
+    protein = Column(Numeric(6, 2))
+    fat = Column(Numeric(6, 2))
+    saturated_fat = Column(Numeric(6, 2))
+    fiber = Column(Numeric(6, 2))
 
+class Category(CategoriesBase):
+    __tablename__ = "categories"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
