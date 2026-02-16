@@ -1,5 +1,3 @@
-# In models.py: Define the Product model class with all fields from your schema
-
 from sqlalchemy import Column, Integer, String, Numeric, Text
 from .database import ProductsBase, CategoriesBase
 
@@ -8,7 +6,6 @@ class Product(ProductsBase):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
-    # category_id is now a simple Integer as it refers to a table in another database
     category_id = Column(Integer)
     price_per_unit = Column(Numeric(10, 2))
     serving_size = Column(Numeric(6, 2))
