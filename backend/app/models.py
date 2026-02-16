@@ -19,6 +19,7 @@ class Product(ProductsBase):
     fat = Column(Numeric(6, 2))
     saturated_fat = Column(Numeric(6, 2))
     fiber = Column(Numeric(6, 2))
+    image_url = Column(String, nullable=True)
 
 class Category(CategoriesBase):
     __tablename__ = "categories"

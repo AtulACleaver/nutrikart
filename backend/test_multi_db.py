@@ -40,7 +40,8 @@ def test_multi_db():
             name="Whey Protein",
             category_id=category_id,
             price_per_unit=1500.00,
-            calories=120
+            calories=120,
+            image_url="https://example.com/images/whey-protein.jpg"
         )
         prod_db.add(test_prod)
         prod_db.commit()
