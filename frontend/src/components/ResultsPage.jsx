@@ -1,5 +1,6 @@
 import ProductCard from './ProductCard'
 import BudgetSummary from './BudgetSummary'
+import NutritionChart from './NutritionChart'
 import { getConditionLabel } from '../utils/formatters'
 
 export default function ResultsPage({ data }) {
@@ -23,7 +24,16 @@ export default function ResultsPage({ data }) {
       {/* Budget summary */}
       <BudgetSummary summary={summary} />
 
+      {/* Charts */}
+      <NutritionChart
+        recommendations={recommendations}
+        summary={summary}
+      />
+
       {/* Product list */}
+      <h3 className="text-lg font-semibold text-gray-800 pt-2">
+        Recommended Products
+      </h3>
       <div className="space-y-3">
         {recommendations.map((product, index) => (
           <ProductCard
