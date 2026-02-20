@@ -4,6 +4,8 @@ import NutritionChart from './NutritionChart'
 import { getConditionLabel } from '../utils/formatters'
 
 export default function ResultsPage({ data }) {
+  if (!data || !data.recommendations) return null
+  
   const { recommendations, summary } = data
 
   return (
