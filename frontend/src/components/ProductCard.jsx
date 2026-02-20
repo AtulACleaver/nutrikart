@@ -3,10 +3,11 @@ import { formatCurrency, formatDecimal } from '../utils/formatters'
 export default function ProductCard({ product, rank }) {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-100
-                    p-4 flex gap-4 hover:shadow-md transition-shadow">
-      {/* Rank badge */}
-      <div className="flex-shrink-0 w-8 h-8 bg-green-100 text-green-700
-                      rounded-full flex items-center justify-center
+                    p-4 flex flex-col sm:flex-row gap-3 sm:gap-4
+                    hover:shadow-md transition-shadow">
+      {/* Rank badge — hidden on mobile */}
+      <div className="hidden sm:flex flex-shrink-0 w-8 h-8 bg-green-100
+                      text-green-700 rounded-full items-center justify-center
                       text-sm font-bold">
         {rank}
       </div>
@@ -72,18 +73,5 @@ export default function ProductCard({ product, rank }) {
         </div>
       </div>
     </div>
-  )
-}
-
-
-function NutrientPill({ label, value, unit, warn = false, good = false }) {
-  let colorClass = 'bg-gray-100 text-gray-600'
-  if (warn) colorClass = 'bg-red-50 text-red-600'
-  if (good) colorClass = 'bg-green-50 text-green-600'
-
-  return (
-    <span className={`text-xs px-2 py-0.5 rounded-full ${colorClass}`}>
-      {label}: {formatDecimal(value, 1)}{unit}
-    </span>
   )
 }
