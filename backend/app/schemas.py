@@ -28,3 +28,44 @@ class CategoryResponse(CategoryBase):
     class Config:
         from_attributes = True
 
+
+# Recommendation Schemas
+
+class RecommendRequest(BaseModel):
+    budget: float
+    health_condition: str | None = None
+    household_size: int = 1
+
+
+class RecommendProduct(BaseModel):
+    product_id: int
+    name: str
+    category_id: int
+    price_per_unit: float
+    quantity: int
+    subtotal: float
+    score: float
+    calories: float
+    sugar: float
+    protein: float
+    fiber: float
+    sodium: float
+    fat: float
+    saturated_fat: float
+    image_url: str | None = None
+
+class RecommendSummary(BaseModel):
+    total_products: int
+    total_spent: float
+    remaining_budget: float
+    budget: float
+    total_calories: float
+    total_protein: float
+    products_considered: int
+    products_after_filter: int
+    health_condition: str | None
+    household_size: int
+
+class RecommendResponse(BaseModel):
+    recommendations: list[RecommendProduct]
+    summary: RecommendSummary
