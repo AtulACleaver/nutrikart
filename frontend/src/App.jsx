@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Header from './components/Header'
 import InputForm from './components/InputForm'
+import ResultsPage from './components/ResultsPage'
 import { getRecommendations } from './api/api'
 
 function App() {
@@ -17,7 +18,8 @@ function App() {
       setResults(data)
     } catch (err) {
       const message =
-        err.response?.data?.detail || 'Something went wrong. Is the backend running?'
+        err.response?.data?.detail ||
+        'Something went wrong. Is the backend running?'
       setError(message)
     } finally {
       setIsLoading(false)
@@ -34,7 +36,7 @@ function App() {
       <Header />
 
       {error && (
-        <div className="max-w-md mx-auto mt-6 px-4">
+        <div className="max-w-5xl mx-auto mt-6 px-4">
           <div className="bg-red-50 border border-red-200 text-red-700
                           rounded-lg px-4 py-3 text-sm">
             {error}
@@ -45,7 +47,7 @@ function App() {
       {!results ? (
         <InputForm onSubmit={handleSubmit} isLoading={isLoading} />
       ) : (
-        <div className="max-w-5xl mx-auto mt-6 px-4">
+        <div className="max-w-5xl mx-auto mt-6 px-4 pb-10">
           <button
             onClick={handleReset}
             className="text-sm text-green-600 hover:text-green-800
@@ -53,10 +55,7 @@ function App() {
           >
             ← New search
           </button>
-          {/* Temporary: show raw JSON to verify API connection */}
-          <pre className="bg-white p-4 rounded-lg shadow text-xs overflow-auto">
-            {JSON.stringify(results, null, 2)}
-          </pre>
+          <ResultsPage data={results} />
         </div>
       )}
     </div>
