@@ -17,6 +17,9 @@ class ProductBase(BaseModel):
     
 class ProductResponse(ProductBase):
     id: int
+    category_name: str | None = None
+    sat_fat: Decimal | None = None
+
     class Config:
         from_attributes = True
 
@@ -38,20 +41,22 @@ class RecommendRequest(BaseModel):
 
 
 class RecommendProduct(BaseModel):
-    product_id: int
+    id: int
     name: str
     category_id: int
+    category_name: str | None = None
     price_per_unit: float
     quantity: int
     subtotal: float
-    score: float
+    score_raw: float
+    score100: int
     calories: float
     sugar: float
     protein: float
     fiber: float
     sodium: float
     fat: float
-    saturated_fat: float
+    sat_fat: float
     image_url: str | None = None
 
 class RecommendSummary(BaseModel):

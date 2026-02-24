@@ -1,95 +1,56 @@
-import { formatCurrency, formatDecimal } from '../utils/formatters'
+import { useCart } from "../store/cartContext";
+import { Link } from "react-router-dom";
 
-export default function ProductCard({ product, rank }) {
-  return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-100
-                    p-4 flex flex-col sm:flex-row gap-3 sm:gap-4
-                    hover:shadow-md transition-shadow">
-      {/* Rank badge — hidden on mobile */}
-      <div className="hidden sm:flex flex-shrink-0 w-8 h-8 bg-green-100
-                      text-green-700 rounded-full items-center justify-center
-                      text-sm font-bold">
-        {rank}
-      </div>
+export default function ProductCard({ p }) {
+	// Pull the add function from cart context.
+	// This component only needs to ADD items - it doesn't need
+	// to know about quantities or totals.
+	const { add } = useCart();
 
-      {/* Product image */}
-      <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden
-                      bg-gray-100">
-        {product.image_url ? (
-          <img
-            src={product.image_url}
-            alt={product.name}
-            className="w-full h-full object-contain"
-            onError={(e) => {
-              e.target.style.display = 'none'
-            }}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center
-                          text-gray-400 text-2xl">
-            🛒
-          </div>
-        )}
-      </div>
-
-      {/* Product info */}
-      <div className="flex-1 min-w-0">
-        <h3 className="font-medium text-gray-900 text-sm leading-tight
-                       truncate">
-          {product.name}
-        </h3>
-
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-green-700 font-semibold text-sm">
-            {formatCurrency(product.price_per_unit)} × {product.quantity}
-          </span>
-          <span className="text-gray-400">→</span>
-          <span className="font-bold text-gray-900">
-            {formatCurrency(product.subtotal)}
-          </span>
-        </div>
-
-        {/* Nutrition pills */}
-        <div className="flex flex-wrap gap-1.5 mt-2">
-          <NutrientPill label="Cal" value={product.calories} unit="kcal" />
-          <NutrientPill label="Sugar" value={product.sugar} unit="g"
-                        warn={product.sugar > 3} />
-          <NutrientPill label="Protein" value={product.protein} unit="g"
-                        good={product.protein > 5} />
-          <NutrientPill label="Fiber" value={product.fiber} unit="g"
-                        good={product.fiber > 3} />
-          <NutrientPill label="Sodium" value={product.sodium} unit="mg"
-                        warn={product.sodium > 150} />
-        </div>
-      </div>
-
-      {/* Score */}
-      <div className="flex-shrink-0 text-right">
-        <div className="text-xs text-gray-400">Score</div>
-        <div className={`text-lg font-bold ${
-          product.score > 0 ? 'text-green-600' : 'text-red-500'
-        }`}>
-          {product.score > 0 ? '+' : ''}{formatDecimal(product.score, 1)}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function NutrientPill({ label, value, unit, warn, good }) {
-  if (value === null || value === undefined) return null
-
-  const colorClass = warn
-    ? 'bg-red-50 text-red-600 border-red-100'
-    : good
-    ? 'bg-green-50 text-green-600 border-green-100'
-    : 'bg-gray-50 text-gray-500 border-gray-100'
-
-  return (
-    <div className={`text-[10px] px-1.5 py-0.5 rounded border ${colorClass} font-medium tracking-tight`}>
-      <span className="opacity-70">{label}:</span>{' '}
-      {formatDecimal(value, 0)}
-      {unit}
-    </div>
-  )
+	return (
+		<div className="rounded-2xl bg-card border border-border shadow-soft overflow-hidden">
+			{/* The entire card is a Link to the product detail page.
+			    Clicking anywhere on the card navigates to /product/:id. */}
+			<Link to={`/product/${p.id}`} className="block">
+				{/* aspect-square forces 1:1 ratio regardless of image dimensions.
+				    bg-surface provides a dark placeholder while the image loads.
+				    object-cover ensures the image fills the square without distortion. */}
+				<div className="aspect-square bg-surface">
+					<img
+						src={p.image_url}
+						alt={p.name}
+						className="h-full w-full object-cover"
+						loading="lazy"
+					/>
+				</div>
+				<div className="p-3">
+					{/* Category name in muted color - secondary info */}
+					<div className="text-sm text-muted">{p.category_name}</div>
+					{/* line-clamp-2 truncates to 2 lines with ellipsis.
+					    Without this, a product named "Organic Whole Wheat Multi-Grain
+					    Stone-Ground Flour 5kg" would push the card height way past
+					    its neighbors and break the grid layout. */}
+					<div className="mt-1 text-[15px] leading-5 font-semibold line-clamp-2">
+						{p.name}
+					</div>
+					<div className="mt-2 flex items-center justify-between">
+						<div className="text-base font-bold">₹{p.price_per_unit}</div>
+						{/* e.preventDefault() stops the Link navigation when clicking Add.
+						    Without it, clicking "Add" would navigate to the product page
+						    instead of adding to cart. The button is nested inside the Link,
+						    so we need to stop the click from bubbling up. */}
+						<button
+							onClick={(e) => {
+								e.preventDefault();
+								add(p, 1);
+							}}
+							className="px-3 py-1.5 rounded-xl bg-accent text-black font-semibold"
+						>
+							Add
+						</button>
+					</div>
+				</div>
+			</Link>
+		</div>
+	);
 }

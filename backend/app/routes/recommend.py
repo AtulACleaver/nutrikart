@@ -2,8 +2,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.database import get_products_db
-from app.models import Product
+from app.database import get_products_db, get_categories_db
+from app.models import Product, Category
 from app.schemas import RecommendRequest, RecommendResponse
 from app.recommendation import get_recommendation
 
@@ -15,6 +15,7 @@ VALID_CONDITIONS = {"diabetic", "hypertension", "weight_loss"}
 def recommend(
     request: RecommendRequest,
     db: Session = Depends(get_products_db),
+    cat_db: Session = Depends(get_categories_db),
 ):
     # ── Validate inputs ──
     if request.health_condition and request.health_condition not in VALID_CONDITIONS:
@@ -56,5 +57,11 @@ def recommend(
                 "Try increasing your budget or removing health condition filters."
             ),
         )
+
+    # ── Add category names ──
+    categories = cat_db.query(Category).all()
+    cat_map = {c.id: c.name for c in categories}
+    for rec in result["recommendations"]:
+        rec["category_name"] = cat_map.get(rec["category_id"])
 
     return result

@@ -224,19 +224,26 @@ def get_recommendation(
     }
 
 def _build_allocation(product, quantity: int, subtotal: float, score: float) -> dict:
+    # Basic normalization: assume scores mostly fall between -150 and 0.
+    # Map -150 -> 0, 0 -> 100.
+    score100 = max(0, min(100, int((score + 150) / 150 * 100)))
+
     return {
-        "product_id": product.id,
+        "id": product.id,
         "name": product.name,
         "category_id": product.category_id,
+        "category_name": getattr(product, "category_name", None),
         "price_per_unit": float(product.price_per_unit) if product.price_per_unit else 0,
         "quantity": quantity,
         "subtotal": subtotal,
-        "score": score,
+        "score_raw": score,
+        "score100": score100,
         "calories": float(product.calories) if product.calories else 0,
         "sugar": float(product.sugar) if product.sugar else 0,
         "protein": float(product.protein) if product.protein else 0,
         "fiber": float(product.fiber) if product.fiber else 0,
         "sodium": float(product.sodium) if product.sodium else 0,
         "fat": float(product.fat) if product.fat else 0,
-        "saturated_fat": float(product.saturated_fat) if product.saturated_fat else 0,
+        "sat_fat": float(product.saturated_fat) if product.saturated_fat else 0,
+        "image_url": product.image_url,
     }
