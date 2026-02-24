@@ -75,21 +75,3 @@ export default function ProductCard({ product, rank }) {
     </div>
   )
 }
-
-function NutrientPill({ label, value, unit, warn, good }) {
-  if (value === null || value === undefined) return null
-
-  const colorClass = warn
-    ? 'bg-red-50 text-red-600 border-red-100'
-    : good
-    ? 'bg-green-50 text-green-600 border-green-100'
-    : 'bg-gray-50 text-gray-500 border-gray-100'
-
-  return (
-    <div className={`text-[10px] px-1.5 py-0.5 rounded border ${colorClass} font-medium tracking-tight`}>
-      <span className="opacity-70">{label}:</span>{' '}
-      {formatDecimal(value, 0)}
-      {unit}
-    </div>
-  )
-}
