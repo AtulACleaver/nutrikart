@@ -1,19 +1,1 @@
 @import "tailwindcss";
-
-@custom-variant dark (&:where(.dark, .dark *));
-
-@theme {
-	--color-bg: rgb(10 10 12);
-	--color-surface: rgb(18 18 22);
-	--color-card: rgb(24 24 28);
-	--color-border: rgb(40 40 48);
-	--color-text: rgb(244 244 245);
-	--color-muted: rgb(161 161 170);
-	--color-accent: rgb(34 197 94);
-	--color-danger: rgb(239 68 68);
-	--shadow-soft: 0 10px 30px rgba(0,0,0,0.35);
-}
-
-:root {
-	color-scheme: dark;
-}
