@@ -1,16 +1,81 @@
-# React + Vite
+# 🎨 NutriKart Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The NutriKart frontend is a modern, responsive web application built with React and Vite. it provides an intuitive interface for users to browse products, select health conditions, and get optimized grocery recommendations.
 
-Currently, two official plugins are available:
+## 🏗️ UI Architecture
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The frontend is organized into pages and reusable components, with state management handled by React Context API.
 
-## React Compiler
+```mermaid
+graph TD
+    App[App.jsx] --> Router[React Router]
+    Router --> Home[Home Page]
+    Router --> Cart[Cart Page]
+    Router --> Product[Product Details]
+    Home --> RecCard[Recommendation Result Card]
+    Cart --> CartList[Cart Items]
+    CartContext[Cart Context] -.-> Home
+    CartContext -.-> Cart
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 📁 Directory Structure
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```text
+frontend/
+├── src/
+│   ├── App.jsx             # Main routing & layout
+│   ├── main.jsx            # Entry point
+│   ├── components/         # Reusable UI elements (Navbar, Buttons, etc.)
+│   ├── pages/              # Full page views
+│   │   ├── Home.jsx        # Recommendation dashboard
+│   │   ├── Cart.jsx        # Shopping cart view
+│   │   └── Product.jsx     # Individual product details
+│   ├── api/                # Axios instances & API call services
+│   ├── store/              # Context Providers (Cart, User, etc.)
+│   ├── utils/              # Helper functions & formatting
+│   └── index.css           # Global styles (Tailwind CSS)
+├── public/                 # Static assets (images, icons)
+├── package.json            # Scripts & dependencies
+└── vite.config.js          # Vite configuration
+```
+
+---
+
+## 🚀 Setup & Installation
+
+### 1. Install Dependencies
+Ensure you have Node.js 18+ installed.
+
+```bash
+npm install
+```
+
+### 2. Run the Development Server
+```bash
+npm run dev
+```
+The application will be accessible at `http://localhost:5173`.
+
+### 3. Build for Production
+```bash
+npm run build
+```
+
+---
+
+## 🛠️ Core Technologies
+- **UI Framework**: [React 18](https://react.dev/)
+- **Build Tool**: [Vite](https://vitejs.dev/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Routing**: [React Router](https://reactrouter.com/)
+- **HTTP Client**: [Axios](https://axios-http.com/)
+- **State Management**: [Context API](https://react.dev/learn/passing-data-deeply-with-context)
+
+---
+
+## 💡 Key Components
+- **`Home` Page**: The main interface where users choose their health condition and budget to receive recommendations.
+- **`Cart` Context**: Manages the global state of selected items and optimized lists.
+- **`RecommendationCard`**: Displays the product score and nutritional breakdown.
