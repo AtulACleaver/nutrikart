@@ -6,7 +6,7 @@ NutriKart is an AI-powered grocery assistant that helps users make informed food
 ![Python](https://img.shields.io/badge/Python-3.10+-blue)
 ![React](https://img.shields.io/badge/React-18-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.109-green)
-![SQLite](https://img.shields.io/badge/SQLite-3-blue)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue)
 
 ---
 
@@ -53,7 +53,7 @@ graph TD
 graph LR
     User((User)) <--> Frontend[React Frontend]
     Frontend <--> API[FastAPI Backend]
-    API <--> DB[(SQLite Databases)]
+    API <--> DB[(PostgreSQL Database)]
     
     subgraph "Backend Modules"
     API --- R[Recommendation Logic]
@@ -180,7 +180,7 @@ NutriKart applies specific constraints and weights based on the selected health 
 
 - **Backend**: [FastAPI](https://fastapi.tiangolo.com/), [SQLAlchemy](https://www.sqlalchemy.org/), [Pydantic](https://docs.pydantic.dev/)
 - **Frontend**: [React](https://reactjs.org/), [Vite](https://vitejs.dev/), [Tailwind CSS](https://tailwindcss.com/)
-- **Database**: [SQLite](https://www.sqlite.org/index.html)
+- **Database**: [PostgreSQL](https://www.postgresql.org/)
 
 ---
 

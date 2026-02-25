@@ -12,7 +12,7 @@ graph TD
     Rec --> Filter[Health Filter]
     Rec --> Score[Scoring Engine]
     Rec --> Alloc[Budget Allocator]
-    Filter --> DB[(SQLite / SQLAlchemy)]
+    Filter --> DB[(PostgreSQL)]
     Score --> DB
 ```
 
@@ -85,5 +85,5 @@ pytest
 - **Framework**: [FastAPI](https://fastapi.tiangolo.com/)
 - **ORM**: [SQLAlchemy](https://www.sqlalchemy.org/)
 - **Validation**: [Pydantic](https://docs.pydantic.dev/)
-- **Database**: [SQLite](https://www.sqlite.org/)
+- **Database**: [PostgreSQL](https://www.postgresql.org/)
 - **Server**: [Uvicorn](https://www.uvicorn.org/)
