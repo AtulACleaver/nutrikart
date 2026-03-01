@@ -16,10 +16,24 @@ graph TD
     Score --> DB
 ```
 
-### Core Services
 - **Health Filter**: Removes products that exceed nutrient thresholds (e.g., max sugar for diabetics).
 - **Scoring Engine**: Calculates a health score for each product based on condition-specific weights.
-- **Budget Allocator**: A greedy algorithm that picks the best-scored items within a price limit.
+- **Budget Allocator**: An optimization engine that uses **Integer Linear Programming** (PuLP) to find the globally optimal grocery mix. Falls back to a Greedy algorithm if needed.
+
+---
+
+## 📈 Optimization Engine
+
+NutriKart uses **Integer Linear Programming (ILP)** to solve the budget allocation problem.
+
+### Why LP?
+The original Greedy algorithm picks items one by one based on score. This can lead to suboptimal budget usage or missing better combinations. The LP solver (powered by [PuLP](https://coin-or.github.io/pulp/)) considers all products simultaneously and finds the combination that **maximizes the total nutrition score** subject to:
+- **Budget Constraint**: Total cost $\le$ user budget.
+- **Quantity Limits**: 0 to `household_size` units per product.
+- **Diversity Constraints**: Minimum number of distinct categories required in the cart.
+
+### Benchmark Results
+The move to LP provides a **provably optimal** allocation, ensuring that every Rupee spent contributes the maximum possible nutritional value for the user's specific health condition.
 
 ---
 
@@ -54,7 +68,9 @@ python -m venv venv
 
 # Activate the environment
 # MacOS/Linux:
+
 source venv/activate
+
 # Windows:
 venv\Scripts\activate
 ```

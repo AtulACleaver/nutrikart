@@ -70,6 +70,7 @@ class RecommendSummary(BaseModel):
     products_after_filter: int
     health_condition: str | None
     household_size: int
+    allocation_method: str = "lp"
 
 class RecommendResponse(BaseModel):
     recommendations: list[RecommendProduct]

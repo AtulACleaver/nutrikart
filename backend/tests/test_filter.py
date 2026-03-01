@@ -1,4 +1,3 @@
-# backend/tests/test_filter.py
 from app.recommendation import filter_products
 from tests.conftest import make_product
 

@@ -185,11 +185,19 @@ def allocate_budget(
 
     return allocations, round(remaining, 2)
 
+try:
+    from app.lp_optimizer import allocate_budget_lp
+    LP_AVAILABLE = True
+except ImportError:
+    LP_AVAILABLE = False
+
+
 def get_recommendation(
     products,
     health_condition: str | None,
     budget: float,
     household_size: int = 1,
+    use_lp: bool = True,
 ):
     # filter (1)
     filtered = filter_products(products, health_condition)
@@ -198,9 +206,16 @@ def get_recommendation(
     ranked = rank_products(filtered, health_condition)
 
     # allocate budget
-    allocations, remaining_budget = allocate_budget(
-        ranked, budget, household_size
-    )
+    if use_lp and LP_AVAILABLE:
+        allocations, remaining_budget = allocate_budget_lp(
+            ranked, budget, household_size
+        )
+        allocation_method = "lp"
+    else:
+        allocations, remaining_budget = allocate_budget(
+            ranked, budget, household_size
+        )
+        allocation_method = "greedy"
 
     # summary stats
     total_spent = sum(a["subtotal"] for a in allocations)
@@ -220,6 +235,7 @@ def get_recommendation(
             "products_after_filter": len(filtered),
             "health_condition": health_condition,
             "household_size": household_size,
+            "allocation_method": allocation_method,
         },
     }
 

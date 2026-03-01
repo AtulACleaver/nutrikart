@@ -1,4 +1,3 @@
-# backend/tests/test_budget.py
 from app.recommendation import allocate_budget, rank_products
 from tests.conftest import make_product
 

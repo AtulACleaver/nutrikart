@@ -14,6 +14,7 @@ VALID_CONDITIONS = {"diabetic", "hypertension", "weight_loss"}
 @router.post("/recommend", response_model=RecommendResponse)
 def recommend(
     request: RecommendRequest,
+    use_lp: bool = True,
     db: Session = Depends(get_products_db),
     cat_db: Session = Depends(get_categories_db),
 ):
@@ -46,6 +47,7 @@ def recommend(
         health_condition=request.health_condition,
         budget=request.budget,
         household_size=request.household_size,
+        use_lp=use_lp,
     )
 
     # ── Handle empty results ──

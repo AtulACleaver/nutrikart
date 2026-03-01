@@ -1,4 +1,3 @@
-# backend/tests/test_score.py
 from app.recommendation import score_product, rank_products
 from tests.conftest import make_product
 
