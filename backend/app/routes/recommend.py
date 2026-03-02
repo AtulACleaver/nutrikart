@@ -1,22 +1,21 @@
-# app/routes/recommend.py (full updated version)
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.database import get_products_db, get_categories_db
-from app.models import Product, Category
-from app.schemas import RecommendRequest, RecommendResponse
-from app.recommendation import get_recommendation
+from ..database import get_db
+from ..models import Product, Category
+from ..schemas import RecommendRequest, RecommendResponse
+from ..recommendation import get_recommendation
 
 router = APIRouter()
 
 VALID_CONDITIONS = {"diabetic", "hypertension", "weight_loss"}
 
+
 @router.post("/recommend", response_model=RecommendResponse)
 def recommend(
     request: RecommendRequest,
     use_lp: bool = True,
-    db: Session = Depends(get_products_db),
-    cat_db: Session = Depends(get_categories_db),
+    db: Session = Depends(get_db),
 ):
     # ── Validate inputs ──
     if request.health_condition and request.health_condition not in VALID_CONDITIONS:
@@ -29,16 +28,10 @@ def recommend(
         )
 
     if request.budget <= 0:
-        raise HTTPException(
-            status_code=400,
-            detail="Budget must be greater than 0",
-        )
+        raise HTTPException(status_code=400, detail="Budget must be greater than 0")
 
     if request.household_size < 1:
-        raise HTTPException(
-            status_code=400,
-            detail="household_size must be at least 1",
-        )
+        raise HTTPException(status_code=400, detail="household_size must be at least 1")
 
     # ── Run pipeline ──
     all_products = db.query(Product).all()
@@ -61,8 +54,7 @@ def recommend(
         )
 
     # ── Add category names ──
-    categories = cat_db.query(Category).all()
-    cat_map = {c.id: c.name for c in categories}
+    cat_map = {c.id: c.name for c in db.query(Category).all()}
     for rec in result["recommendations"]:
         rec["category_name"] = cat_map.get(rec["category_id"])
 

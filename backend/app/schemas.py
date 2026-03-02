@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from decimal import Decimal
 
 class ProductBase(BaseModel):
@@ -20,16 +20,14 @@ class ProductResponse(ProductBase):
     category_name: str | None = None
     sat_fat: Decimal | None = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class CategoryBase(BaseModel):
     name: str
 
 class CategoryResponse(CategoryBase):
     id: int
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Recommendation Schemas

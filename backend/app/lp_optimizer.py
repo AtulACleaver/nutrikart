@@ -13,7 +13,7 @@ Formulation:
 
 Big-M trick links binary indicators y_c to product quantities:
     Σ qty_i(in cat c) ≥ y_c
-    Σ qty_i(in cat c) ≤ M × y_c
+    Σ qty_i(in cat c) ≤ M x y_c
 """
 import pulp
 
@@ -123,7 +123,6 @@ def allocate_budget_lp(
         return [], round(budget, 2)
         
     prob.solve(solver)
-    print(f"LP Solver Status: {pulp.LpStatus[prob.status]}, min_categories: {min_categories}")
 
     if prob.status != pulp.constants.LpStatusOptimal:
         # Fallback to a simpler model if diversity constraints make it infeasible

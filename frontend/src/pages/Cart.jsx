@@ -37,11 +37,10 @@ export default function Cart() {
 			}
 			setRecsLoading(true);
 			try {
-				const data = await getRecommendations({
+			const data = await getRecommendations({
 					budget,
-					health_condition: healthCondition,
+					health_condition: healthCondition === "none" ? null : healthCondition,
 					household_size: householdSize,
-					cart: payload,
 				});
 				setRecommendations(data.recommendations || []);
 			} catch (err) {
