@@ -306,6 +306,51 @@ The pytest suite (`tests/`) includes unit tests that assert `lp_wns >= greedy_wn
 
 ---
 
+## 🗺️ Product Roadmap: Upgrade 2 (Kitchen Planner + Regional Catalogue)
+
+Aligned with the approved [PROJECT 1: NutriKart Specification](https://app.notion.com/p/creative-templates/PROJECT-1-NutriKart-308a2dabee17807faf13fd2b18a1196a):
+
+### 1. Architectural Evolution: Plan-First Model
+Transitioning from a catalogue-first shopping browser to an interactive **Plan-First Kitchen Planner**:
+- **Route Reorganization**: `/` becomes the interactive Kitchen Planner; catalogue browsing moves to `/shop`.
+- **Design Theme**: *1b Kitchen Planner* — Light Organic aesthetic using Sage for planning flows, Terracotta for basket actions, Caprasimo serif headers, and Figtree body text.
+- **Decoupled Architecture**: Separates offline nutrition verification from on-demand regional pricing and stock queries.
+
+```mermaid
+flowchart LR
+    S["Structured Nutrition / Label OCR"] -->|"Candidate Values"| V["Verification Workflow"]
+    V -->|"Verified Records + Basis"| D[(PostgreSQL / Supabase)]
+    U["React / Vercel"] -->|"Profile & Coordinates"| A["FastAPI / Render"]
+    A -->|"Read Verified Records"| D
+    A -->|"Query Permitted Offers"| P["Retailer Adapter"]
+    P -->|"Live Offers"| W["Instamart API / MCP (Optional)"]
+    P -->|"Guaranteed Fallback"| F["Labelled Static Catalogue"]
+    D -->|"Eligible Products"| E["PuLP Optimizer / Engine"]
+    P -->|"Matched Offers"| E
+    E -->|"Optimized Basket + Disclosures"| A
+    A -->|"Basket + Freshness / Status"| U
+```
+
+### 2. Core Workstreams & Quality Guardrails
+| Workstream | Target Outcome | Guardrail |
+|---|---|---|
+| **Plan-First UI** | Separate Plan, Shop, Product, and Basket views; responsive navigation; basket merging | Follow approved design handoff; transparent limits without medical claims |
+| **Regional Offers** | Instamart variant lookup for local price & availability | Must preserve a clearly labelled static fallback; external API delays never block release |
+| **Nutrition Records** | Structured lookup (e.g., OpenFoodFacts) + packaging OCR candidates | Explicit measurement basis (`per 100g`, `per serving`, `per 100ml`); unverified stays unverified |
+| **Recommendation Integrity** | Unknown-nutrient handling; prevent missing values from passing filters as "verified fits" | Missing values are distinct from measured zero; `/recommend` 404 treated as clean empty state |
+| **Release Proof** | Automated regression suite + browser journey tests | Measured portfolio evidence only; reproducible benchmarks |
+
+### 3. Phased Execution Plan (91 Calendar Days)
+- **Phase 0 (Days 1–7) — Baseline & Regression Inventory**: Freeze commit `60f0463`, verify isolated builds, record existing journeys, profile catalog nulls and units.
+- **Phase 1 (Days 8–21) — Verified Data Foundation & Access Spike**: Units/pack contracts, candidate product selection (~30 items), Swiggy feasibility decision at Gate 2.
+- **Phase 2 (Days 22–35) — Recommendation Integrity & API Contracts**: Fix unknown-data filtering, measurement-basis contracts, deterministic explanations.
+- **Phase 3 (Days 36–56) — Kitchen Planner Interface**: Design tokens, route shell, Plan form, Shop page, Basket drawer, updated PDF export.
+- **Phase 4 (Days 57–70) — Optional Live Services & Mandatory Fallback**: Provider boundary, matching engine, staging test, release decision at Gate 5.
+- **Phase 5 (Days 71–84) — Release Proof & Portfolio Evidence**: Regression suite, nutrition extraction audit, privacy audit, rollback proof.
+- **Phase 6 (Days 85–91) — Bounded Final Iteration & Handoff**: Final metric verification, 2-minute demo recording, portfolio handoff.
+
+---
+
 ## 📝 License
 
 MIT License — free to use, modify, and distribute.
