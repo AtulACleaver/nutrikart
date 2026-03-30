@@ -62,3 +62,49 @@ To protect production databases (Supabase) from accidental corruption during tes
 1. Local SQLite driver fallback is supported in `backend/app/database.py` via `sqlite:///nutrikart.db`.
 2. A database seeder (`backend/seed_db.py`) is provided to populate local isolated SQLite instances directly from `data/products.csv`.
 3. Test fixtures in `backend/tests/conftest.py` use ephemeral SQLite in-memory databases (`sqlite:///:memory:`) for test isolation.
+
+---
+
+## 2. Day 2: Build, Test & Lint Verification (30 March 2026)
+
+### 2.1 Backend Pytest Suite Reproduction
+Executing test suite in isolated Python 3.12 environment (`backend/`):
+```bash
+python -m pytest tests/ -q
+```
+**Results:**
+- Tests executed: `35 passed in 2.86s`
+  - `test_api.py`: 7 passed
+  - `test_budget.py`: 5 passed
+  - `test_filter.py`: 9 passed
+  - `test_lp_optimizer.py`: 8 passed
+  - `test_score.py`: 6 passed
+- Status: **PASSED (100%)**
+
+### 2.2 Frontend Production Build
+Executing Vite production build (`frontend/`):
+```bash
+npm run build
+```
+**Results:**
+- Build duration: `2.14s`
+- Chunks generated:
+  - `dist/index.html`: `0.45 kB`
+  - `dist/assets/index-DF0rkNF7.css`: `16.18 kB` (gzip: 3.94 kB)
+  - `dist/assets/index-DpZGKhJ3.js`: `702.77 kB` (gzip: 227.84 kB)
+- Note: Vite emitted a bundle chunk warning (`index-*.js > 500 kB`), indicating code-splitting optimization is needed in Upgrade 2.
+- Status: **PASSED**
+
+### 2.3 Frontend Lint Audit (ESLint)
+Executing ESLint check (`frontend/`):
+```bash
+npm run lint
+```
+**Observed Issues (Recorded honestly without suppression):**
+- Total problems: `4 problems (3 errors, 1 warning)`
+  1. `frontend/src/pages/Home.jsx:26:3`: Error `react-hooks/set-state-in-effect` — Synchronous `setState` in `useEffect` causing cascading render warnings.
+  2. `frontend/src/pages/Product.jsx:18:3`: Error `react-hooks/set-state-in-effect` — Synchronous `setState` in `useEffect`.
+  3. `frontend/src/store/cartContext.jsx:57:14`: Error `react-refresh/only-export-components` — Non-component helper exported alongside React context component.
+  4. `frontend/src/pages/Cart.jsx:32:20`: Warning `react-hooks/exhaustive-deps` — `useCallback` received a function whose dependencies are unknown.
+- Status: **FAILED (Requires remediation in Phase 3/5)**
+
