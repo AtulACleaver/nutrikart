@@ -47,3 +47,49 @@
 - **Failure Observations**:
   - **Cold Start Latency**: Backend hosted on Render free tier incurs 30–50s spin-up delay on initial wake, during which UI shows a loading spinner.
   - **404 on Empty Match**: When a restrictive condition or low budget produces zero matching products, backend responds with `HTTP 404 Not Found` (`{"detail": "No products match your criteria"}`), causing frontend to display a red network error banner instead of a graceful empty state.
+
+---
+
+## 2. Day 5: Formal Regression Backlog & Acceptance Criteria (2 April 2026)
+
+The following 6 verified issues have been reproduced and cataloged into the regression backlog. Each entry links to automated reproduction tests where applicable.
+
+### REG-01: Incomplete Nutrition Records Bypass Health Constraints
+- **Severity**: High (Data Integrity / Safety)
+- **Reproduction**: `backend/tests/test_regressions.py::test_reproduce_incomplete_product_bypasses_diabetic_filter`
+- **Observed Bug**: In `filter_products`, `if product_value is None: continue` allows products missing sugar, sodium, or saturated fat to pass condition filters.
+- **Desired Behavior**: Introduce explicit `UNKNOWN` nutrient states. Products with unknown values for condition-critical limits must not receive a "verified fit" verdict.
+- **Acceptance Criteria**: In Phase 2, `filter_products` partitions candidates into `verified_fit`, `unverified_unknown`, and `violates_limit`.
+
+### REG-02: Missing Nutrients Coerced Silently to Measured Zero
+- **Severity**: Medium (Data Transparency)
+- **Reproduction**: `backend/tests/test_regressions.py::test_reproduce_missing_nutrients_silently_coerced_to_zero`
+- **Observed Bug**: `_build_allocation` transforms `product.sugar = None` into `0.0`, masking missing data as zero grams.
+- **Desired Behavior**: Pydantic response models and JSON output must preserve `None` / `null` or carry a field-level verification flag.
+- **Acceptance Criteria**: Response schema allows `float | None` for macros and does not fabricate measurements.
+
+### REG-03: Serving Size Lacks Measurement Basis & Explicit Units
+- **Severity**: Medium (UX / Calculation Correctness)
+- **Observed Bug**: `serving_size` is stored as an undifferentiated decimal (e.g. `38.00`, `200.00`). Multiplying pack counts by per-serving values creates incorrect basket nutrient totals.
+- **Desired Behavior**: Introduce explicit basis (`per_100g`, `per_100ml`, `per_serving`) and units (`g`, `ml`, `piece`).
+- **Acceptance Criteria**: Data schema includes `measurement_basis` and `serving_unit`.
+
+### REG-04: Empty Recommendations Result in HTTP 404 Exception
+- **Severity**: Medium (API Contract / UX)
+- **Reproduction**: `backend/tests/test_regressions.py::test_reproduce_empty_recommendation_raises_http_404`
+- **Observed Bug**: When budget is too low (e.g. ₹10) or filters exclude all items, `/recommend` raises `HTTPException(404)`. Frontend treats this as a broken endpoint.
+- **Desired Behavior**: Return `HTTP 200 OK` with `recommendations: []` and descriptive diagnostics in `summary`.
+- **Acceptance Criteria**: Frontend renders a friendly empty state ("Try increasing your budget") without network alert banners.
+
+### REG-05: Missing Basket-Level Score in Recommendation Summary
+- **Severity**: Low (Feature Completeness)
+- **Observed Bug**: `RecommendSummary` includes `total_spent`, `total_calories`, `total_protein`, but no composite basket-level score.
+- **Desired Behavior**: Do not render mockup ScoreRing until a defensible basket-level scoring metric is implemented.
+- **Acceptance Criteria**: Basket ScoreRing remains hidden in UI until metric contract is finalized.
+
+### REG-06: Frontend Synchronous setState in useEffect & Context Export Warnings
+- **Severity**: Low (Code Quality / Fast Refresh)
+- **Observed Bug**: ESLint emits 4 issues (cascading render warnings in `Home.jsx` and `Product.jsx`, context export warning in `cartContext.jsx`, `useCallback` warning in `Cart.jsx`).
+- **Desired Behavior**: Clean lint run adhering to React 19 standards.
+- **Acceptance Criteria**: Remediate component lifecycle effects in Phase 3.
+
