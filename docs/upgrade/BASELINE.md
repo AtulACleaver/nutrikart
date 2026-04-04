@@ -123,4 +123,51 @@ npm run lint
   - No blockers required schedule recovery.
 - **Rule Enforcement**: Per project guardrails, unused buffer capacity remains reserved. No speculative features or out-of-scope code additions were allocated to this slot.
 
+---
+
+## 4. Day 7: Gate 1 Baseline Review & Milestone Sign-off (4 April 2026)
+
+### 4.1 Acceptance Command Re-Execution
+Re-verifying all baseline commands on Day 7 prior to milestone closure:
+- **Backend Test Suite**:
+  ```bash
+  cd backend && python -m pytest tests/ -q
+  ```
+  Result: **39 passed in 1.55s** (35 baseline regression guards + 4 automated reproduction tests).
+- **Frontend Production Build**:
+  ```bash
+  cd frontend && npm run build
+  ```
+  Result: **Build passed in 2.14s** (`dist/` assets generated cleanly).
+
+### 4.2 Reconciliation of Regression Backlog with Shipped Behaviors
+| Defect ID | Title | Existing Behavior | Planned Upgrade 2 Fix (Phase) |
+|---|---|---|---|
+| `REG-01` | Missing nutrients bypass health filters | Product with `null` sugar passes diabetic check | Phase 2 (Explicit unknown state) |
+| `REG-02` | Missing nutrients coerced to 0.0 | `sugar=None` serialized as `0.0` in recommendations | Phase 2 (Preserve null / explicit basis) |
+| `REG-03` | Serving size unit ambiguity | Unitless decimal values | Phase 1 (Declared units & basis) |
+| `REG-04` | Empty match throws HTTP 404 | 404 error banner in UI | Phase 2 (HTTP 200 with empty list) |
+| `REG-05` | Mockup ScoreRing without basket score | ScoreRing rendered without metric backing | Phase 3 (Hide ScoreRing until verified) |
+| `REG-06` | Frontend useEffect cascading setState | ESLint warnings in Home/Product | Phase 3 (Clean React 19 architecture) |
+
+### 4.3 Scope Freeze for Phase 1
+- **Preserved Core**:
+  - FastAPI + PostgreSQL/SQLite backend architecture.
+  - PuLP Integer Linear Programming optimizer and greedy fallback.
+  - React 19 + Vite + Tailwind CSS foundation.
+- **Approved Exclusions for Phase 1**:
+  - No live payments or user authentication system.
+  - No scraping of unsupported third-party services.
+  - Unauthenticated or unverified external nutrition values remain marked as unverified.
+
+### 4.4 Gate 1 Verification Checklist
+- [x] Baseline revision `60f0463` frozen and isolated SQLite environment documented.
+- [x] All 35 original tests + 4 reproduction tests passing.
+- [x] Complete data profile of `data/products.csv` generated (`DATA_PROFILE.md`).
+- [x] User journeys and viewport audit documented (`REGRESSIONS.md`).
+- [x] 6 formal regression items documented with acceptance criteria.
+- [x] Unused buffer reserved without scope creeping.
+- [x] **Gate 1 Status**: **APPROVED — Ready for Phase 1 (Days 8–21)**.
+
+
 
