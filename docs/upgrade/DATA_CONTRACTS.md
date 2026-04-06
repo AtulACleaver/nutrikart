@@ -116,3 +116,24 @@ $$\text{Salt (g)} = \frac{\text{Sodium (mg)} \times 2.5}{1000}$$
 $$\text{Servings Per Pack} = \frac{\text{pack\_quantity}}{\text{serving\_size}}$$
 $$\text{Basket Nutrient Total} = \sum_{i \in \text{Basket}} \text{quantity}_i \times \text{Servings Per Pack}_i \times \text{Nutrient Per Serving}_i$$
 - **Suppression Rule**: If `measurement_basis` is missing or unknown, basket-level nutrient summation for that nutrient must be **suppressed** with an explicit disclosure rather than calculated as zero.
+
+---
+
+## 3. Worked Unit Examples & Edge Cases
+
+### 3.1 Example 1: Salt to Sodium Conversion
+- **Label**: Oats label states `Salt: 1.125 g per 100 g`.
+- **Conversion**:
+  $$\text{Sodium} = \frac{1.125}{2.5} \times 1000 = 450.0\text{ mg}$$
+- **Verification Result**: Matches declared sodium specification of 450 mg.
+
+### 3.2 Example 2: Energy Conversion (kJ to kcal)
+- **Label**: Imported bar lists `Energy: 836.8 kJ`.
+- **Conversion**:
+  $$\text{Calories} = \frac{836.8}{4.184} = 200.0\text{ kcal}$$
+
+### 3.3 Example 3: Liquid Volume vs Weight Restriction
+- **Item**: Amul Taaza Toned Milk (1 L bottle).
+- **Rule**: Declared nutrition is `per 100 ml`. Milk density is $\approx 1.03\text{ g/ml}$.
+- Without liquid measurement context, density assumption is disallowed; calculations must strictly use volume basis `PER_100ML`.
+
