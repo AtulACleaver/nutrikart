@@ -51,3 +51,10 @@ When official provider credentials become available:
 1. Configure credentials securely via environment variables (`INSTAMART_API_KEY`, `INSTAMART_PARTNER_ID`).
 2. Run an isolated read-only staging smoke test against a user-selected pin code.
 3. Gate 5 will verify live vs static fallback behavior before production release.
+
+---
+
+## 3. Access Spike Buffer Audit (10 April 2026)
+- **Buffer Status**: **Unused / Reserved**.
+- **Audit Outcome**: The fallback architecture protects the project timeline from third-party vendor lock-in. All downstream tasks will proceed against `data/verified_manifest.json` and isolated SQLite database.
+
