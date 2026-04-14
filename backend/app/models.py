@@ -29,6 +29,18 @@ class Product(Base):
     fiber         = Column(Numeric(6, 2))
     image_url     = Column(String, nullable=True)
 
+    # Provenance, basis and identity fields for Upgrade 2
+    brand         = Column(String, nullable=True)
+    variant       = Column(String, nullable=True)
+    pack_quantity = Column(Numeric(10, 2), nullable=True)
+    pack_unit     = Column(String, nullable=True, default="g")
+    serving_unit  = Column(String, nullable=True, default="g")
+    measurement_basis = Column(String, nullable=True, default="per_serving")
+    verification_status = Column(String, nullable=False, default="verified")
+    source_type   = Column(String, nullable=True, default="seed")
+    source_ref    = Column(String, nullable=True)
+    version       = Column(Integer, nullable=False, default=1)
+
     category = relationship("Category", back_populates="products")
 
     __table_args__ = (

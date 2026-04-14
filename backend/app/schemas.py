@@ -15,6 +15,18 @@ class ProductBase(BaseModel):
     fiber: Decimal | None = None
     image_url: str | None = None
     
+    # Provenance and identity fields
+    brand: str | None = None
+    variant: str | None = None
+    pack_quantity: Decimal | None = None
+    pack_unit: str | None = "g"
+    serving_unit: str | None = "g"
+    measurement_basis: str | None = "per_serving"
+    verification_status: str | None = "verified"
+    source_type: str | None = "seed"
+    source_ref: str | None = None
+    version: int = 1
+    
 class ProductResponse(ProductBase):
     id: int
     category_name: str | None = None
@@ -56,6 +68,12 @@ class RecommendProduct(BaseModel):
     fat: float
     sat_fat: float
     image_url: str | None = None
+    brand: str | None = None
+    variant: str | None = None
+    measurement_basis: str | None = "per_serving"
+    verification_status: str | None = "verified"
+    source_ref: str | None = None
+    is_fallback: bool = True
 
 class RecommendSummary(BaseModel):
     total_products: int

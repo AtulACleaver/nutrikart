@@ -262,4 +262,10 @@ def _build_allocation(product, quantity: int, subtotal: float, score: float) -> 
         "fat": float(product.fat) if product.fat else 0,
         "sat_fat": float(product.saturated_fat) if product.saturated_fat else 0,
         "image_url": product.image_url,
+        "brand": getattr(product, "brand", None),
+        "variant": getattr(product, "variant", None),
+        "measurement_basis": getattr(product, "measurement_basis", "per_serving"),
+        "verification_status": getattr(product, "verification_status", "verified"),
+        "source_ref": getattr(product, "source_ref", None),
+        "is_fallback": True,
     }
