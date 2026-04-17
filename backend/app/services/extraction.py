@@ -84,7 +84,9 @@ class LabelExtractionService:
 
         # Check completeness of vital macros
         missing = [m for m in ["calories", "protein", "fat", "sugar", "sodium"] if extracted[m] is None]
-        if missing:
+        if len(missing) == 5:
+            return False, {}, "Unreadable label: failed to extract any recognized macronutrients"
+        elif missing:
             return True, extracted, f"Partial extraction: missing {', '.join(missing)}; routed to review queue"
 
         return True, extracted, None
