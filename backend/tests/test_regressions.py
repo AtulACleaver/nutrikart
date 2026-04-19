@@ -26,51 +26,38 @@ class MockProduct:
         self.image_url = kwargs.get("image_url", "https://example.com/test.jpg")
 
 
-def test_reproduce_incomplete_product_bypasses_diabetic_filter():
+def test_incomplete_product_rejected_by_diabetic_filter():
     """
-    REG-01 REPRODUCTION:
-    Demonstrates that products with missing required nutrients (e.g. sugar=None)
-    currently pass the diabetic constraint filter instead of being flagged as unknown or excluded.
-    
-    Existing behavior: product is included in filtered list because 'product_value is None: continue'.
-    Desired behavior (Upgrade 2): products with unknown required nutrients must NOT be verified fits.
+    REG-01 FIX VERIFICATION:
+    Verifies that products with missing required nutrients (sugar=None)
+    are strictly excluded from the diabetic constraint filter.
     """
     incomplete_prod = MockProduct(sugar=None, calories=Decimal("120.00"))
     filtered = filter_products([incomplete_prod], health_condition="diabetic")
-    
-    # In current baseline, this passes (buggy behavior)
-    assert len(filtered) == 1, "Baseline behavior: missing sugar passes diabetic filter"
-    assert filtered[0].sugar is None
+    assert len(filtered) == 0, "Missing sugar must be rejected from diabetic filter"
 
 
-def test_reproduce_incomplete_product_bypasses_hypertension_filter():
+def test_incomplete_product_rejected_by_hypertension_filter():
     """
-    REG-01 REPRODUCTION:
-    Demonstrates that products with missing sodium (sodium=None) pass the hypertension filter.
+    REG-01 FIX VERIFICATION:
+    Verifies that products with missing sodium are excluded from hypertension filter.
     """
     incomplete_prod = MockProduct(sodium=None, fat=Decimal("2.00"))
     filtered = filter_products([incomplete_prod], health_condition="hypertension")
-    
-    assert len(filtered) == 1, "Baseline behavior: missing sodium passes hypertension filter"
-    assert filtered[0].sodium is None
+    assert len(filtered) == 0, "Missing sodium must be rejected from hypertension filter"
 
 
-def test_reproduce_missing_nutrients_silently_coerced_to_zero():
+def test_missing_nutrients_preserved_as_none():
     """
-    REG-02 REPRODUCTION:
-    Demonstrates that _build_allocation coerces missing (None) nutrient fields
-    into 0.0, disguising missing information as measured zero.
-    
-    Existing behavior: 'sugar': float(product.sugar) if product.sugar else 0 -> 0.0
-    Desired behavior (Upgrade 2): preserve None/null or provide explicit provenance.
+    REG-02 FIX VERIFICATION:
+    Verifies that _build_allocation preserves None/null values rather than coercing to 0.0.
     """
     incomplete_prod = MockProduct(sugar=None, fiber=None, sodium=None)
     allocation = _build_allocation(incomplete_prod, quantity=1, subtotal=100.0, score=10.0)
     
-    # In current baseline, missing fields are coerced to 0
-    assert allocation["sugar"] == 0, "Baseline behavior: sugar None coerced to 0"
-    assert allocation["fiber"] == 0, "Baseline behavior: fiber None coerced to 0"
-    assert allocation["sodium"] == 0, "Baseline behavior: sodium None coerced to 0"
+    assert allocation["sugar"] is None, "Missing sugar preserved as None"
+    assert allocation["fiber"] is None, "Missing fiber preserved as None"
+    assert allocation["sodium"] is None, "Missing sodium preserved as None"
 
 
 def test_reproduce_empty_recommendation_raises_http_404():

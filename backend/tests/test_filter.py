@@ -44,11 +44,16 @@ def test_empty_product_list():
     assert result == []
 
 
-def test_missing_data_product_passes_filter(sample_products):
-    """Products with None nutrition values should pass through (lenient)."""
+def test_missing_data_product_excluded_from_condition_filter(sample_products):
+    """Products with missing required nutrition values must NOT pass condition filters."""
     result = filter_products(sample_products, "diabetic")
     names = [p.name for p in result]
-    assert "Missing Data Product" in names
+    assert "Missing Data Product" not in names, "Missing sugar must be excluded from diabetic filter"
+
+    # When no condition filter is specified, missing data product is allowed for general browsing
+    general_result = filter_products(sample_products, None)
+    general_names = [p.name for p in general_result]
+    assert "Missing Data Product" in general_names
 
 
 def test_weight_loss_filter():
