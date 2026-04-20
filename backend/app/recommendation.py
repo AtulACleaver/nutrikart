@@ -40,15 +40,19 @@ def filter_products(products, health_condition: str | None):
     filtered = []
 
     for product in products:
+        # Unverified / unknown records cannot be represented as verified fits
+        if getattr(product, "verification_status", None) == "unverified_unknown":
+            continue
+
         passes = True
         for constraint_key, max_value in constraints.items():
             field_name = CONSTRAINT_FIELD_MAP[constraint_key]
             product_value = getattr(product, field_name, None)
 
-            # If nutrition data is missing, let the product through
-            # (don't penalize incomplete data)
+            # Strict guardrail: Missing required nutrients cannot pass condition filters
             if product_value is None:
-                continue
+                passes = False
+                break
 
             if product_value > max_value:
                 passes = False
@@ -219,8 +223,8 @@ def get_recommendation(
 
     # summary stats
     total_spent = sum(a["subtotal"] for a in allocations)
-    total_calories = sum(a["calories"] * a["quantity"] for a in allocations)
-    total_protein = sum(a["protein"] * a["quantity"] for a in allocations)
+    total_calories = sum((a["calories"] or 0) * a["quantity"] for a in allocations)
+    total_protein = sum((a["protein"] or 0) * a["quantity"] for a in allocations)
 
     return {
         "recommendations": allocations,
@@ -249,18 +253,18 @@ def _build_allocation(product, quantity: int, subtotal: float, score: float) -> 
         "name": product.name,
         "category_id": product.category_id,
         "category_name": getattr(product, "category_name", None),
-        "price_per_unit": float(product.price_per_unit) if product.price_per_unit else 0,
+        "price_per_unit": float(product.price_per_unit) if product.price_per_unit is not None else 0.0,
         "quantity": quantity,
         "subtotal": subtotal,
         "score_raw": score,
         "score100": score100,
-        "calories": float(product.calories) if product.calories else 0,
-        "sugar": float(product.sugar) if product.sugar else 0,
-        "protein": float(product.protein) if product.protein else 0,
-        "fiber": float(product.fiber) if product.fiber else 0,
-        "sodium": float(product.sodium) if product.sodium else 0,
-        "fat": float(product.fat) if product.fat else 0,
-        "sat_fat": float(product.saturated_fat) if product.saturated_fat else 0,
+        "calories": float(product.calories) if product.calories is not None else None,
+        "sugar": float(product.sugar) if product.sugar is not None else None,
+        "protein": float(product.protein) if product.protein is not None else None,
+        "fiber": float(product.fiber) if product.fiber is not None else None,
+        "sodium": float(product.sodium) if product.sodium is not None else None,
+        "fat": float(product.fat) if product.fat is not None else None,
+        "sat_fat": float(product.saturated_fat) if product.saturated_fat is not None else None,
         "image_url": product.image_url,
         "brand": getattr(product, "brand", None),
         "variant": getattr(product, "variant", None),

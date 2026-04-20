@@ -60,13 +60,13 @@ class RecommendProduct(BaseModel):
     subtotal: float
     score_raw: float
     score100: int
-    calories: float
-    sugar: float
-    protein: float
-    fiber: float
-    sodium: float
-    fat: float
-    sat_fat: float
+    calories: float | None = None
+    sugar: float | None = None
+    protein: float | None = None
+    fiber: float | None = None
+    sodium: float | None = None
+    fat: float | None = None
+    sat_fat: float | None = None
     image_url: str | None = None
     brand: str | None = None
     variant: str | None = None
