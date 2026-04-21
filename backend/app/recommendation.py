@@ -32,6 +32,30 @@ CONSTRAINT_FIELD_MAP = {
 # If health_condition is None or not recognized, return all products.
 
 
+def get_normalized_serving_nutrient(product, field_name: str) -> Decimal | None:
+    """
+    Normalizes a nutrient value to a 'per_serving' basis.
+    If product basis is per_100g or per_100ml, scales via serving_size / 100.
+    If basis is unknown or serving_size is missing, returns None to prevent ungrounded fits.
+    """
+    raw_val = getattr(product, field_name, None)
+    if raw_val is None:
+        return None
+
+    basis = getattr(product, "measurement_basis", "per_serving") or "per_serving"
+
+    if basis == "per_serving":
+        return Decimal(str(raw_val))
+    elif basis in ("per_100g", "per_100ml"):
+        serving_size = getattr(product, "serving_size", None)
+        if not serving_size or float(serving_size) <= 0:
+            return None  # Cannot normalize without valid serving size
+        factor = Decimal(str(serving_size)) / Decimal("100.0")
+        return round(Decimal(str(raw_val)) * factor, 2)
+    else:
+        return None  # Unsupported basis
+
+
 def filter_products(products, health_condition: str | None):
     if not health_condition or health_condition not in HEALTH_CONSTRAINTS:
         return list(products)  # no filtering
@@ -47,9 +71,10 @@ def filter_products(products, health_condition: str | None):
         passes = True
         for constraint_key, max_value in constraints.items():
             field_name = CONSTRAINT_FIELD_MAP[constraint_key]
-            product_value = getattr(product, field_name, None)
+            # Obtain normalized per-serving value according to the measurement basis contract
+            product_value = get_normalized_serving_nutrient(product, field_name)
 
-            # Strict guardrail: Missing required nutrients cannot pass condition filters
+            # Strict guardrail: Missing or non-convertible nutrients cannot pass condition filters
             if product_value is None:
                 passes = False
                 break
