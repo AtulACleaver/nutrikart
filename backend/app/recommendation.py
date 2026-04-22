@@ -174,18 +174,13 @@ def allocate_budget(
 ):
     """
     Greedy budget allocation: buy from best-scored products first.
-    
-    household_size multiplies the base quantity per product.
-    A family of 4 gets 4 units where a single person gets 1.
-    
-    Returns:
-        allocations: list of dicts (product info + quantity + subtotal)
-        remaining_budget: float
+    Enforces bounded household size (1 to 10) and strict integer quantities.
     """
+    if not ranked_products or budget <= 0:
+        return [], round(budget, 2) if budget > 0 else 0.0
 
-    # Greedy picks the locally optimal choice at each step. It's not globally optimal (a smarter algorithm might skip an expensive #1 product to buy #2, #3, and #4 for better total nutrition). But it's simple, fast, and produces sensible results. Phase 5's PuLP upgrade solves the global optimization problem.
-
-    remaining = float(budget)
+    household_size = max(1, min(10, int(household_size)))
+    remaining = round(float(budget), 2)
     allocations = []
 
     for product, score in ranked_products:

@@ -43,10 +43,11 @@ def allocate_budget_lp(
     if not ranked_products or budget <= 0:
         return [], round(budget, 2) if budget > 0 else 0.0
 
+    # Enforce safe household boundaries (1 to 10)
+    household_size = max(1, min(10, int(household_size)))
+
     # Align with greedy behavior: typically 1 unit per person in household.
-    # While the user suggested household_size * 3, using household_size ensures
-    # the solver finds the best *set* of items to fill the budget without
-    # hoarding a single item when scores are negative.
+    # Using household_size ensures the solver finds the best set of items to fill the budget.
     max_qty = max_qty_per_product or household_size
 
     prob = pulp.LpProblem("NutriKart_Budget", pulp.LpMaximize)
