@@ -260,6 +260,10 @@ def get_recommendation(
             "health_condition": health_condition,
             "household_size": household_size,
             "allocation_method": allocation_method,
+            "data_mode": "static_catalogue",
+            "is_fallback": True,
+            "freshness_status": "verified_static_baseline",
+            "disclaimer": "NutriKart recommendations apply heuristic nutrient limits to verified food data. Not clinical advice.",
         },
     }
 

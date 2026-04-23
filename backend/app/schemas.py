@@ -87,6 +87,10 @@ class RecommendSummary(BaseModel):
     health_condition: str | None
     household_size: int
     allocation_method: str = "lp"
+    data_mode: str = "static_catalogue"
+    is_fallback: bool = True
+    freshness_status: str = "verified_static_baseline"
+    disclaimer: str = "NutriKart recommendations apply heuristic nutrient limits to verified food data. Not clinical advice."
 
 class RecommendResponse(BaseModel):
     recommendations: list[RecommendProduct]
