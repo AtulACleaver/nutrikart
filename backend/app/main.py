@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from .routes import categories, products, recommend
+from .routes import categories, products, recommend, profile_rules
 from fastapi.middleware.cors import CORSMiddleware
 import os
 from dotenv import load_dotenv
@@ -35,6 +35,7 @@ app.add_middleware(
 app.include_router(categories.router)
 app.include_router(products.router)
 app.include_router(recommend.router)
+app.include_router(profile_rules.router)
 
 @app.get("/")
 def read_root():
