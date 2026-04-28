@@ -74,6 +74,7 @@ class RecommendProduct(BaseModel):
     verification_status: str | None = "verified"
     source_ref: str | None = None
     is_fallback: bool = True
+    selection_reason: str | None = None
 
 class RecommendSummary(BaseModel):
     total_products: int
@@ -95,3 +96,4 @@ class RecommendSummary(BaseModel):
 class RecommendResponse(BaseModel):
     recommendations: list[RecommendProduct]
     summary: RecommendSummary
+    exclusions: list[dict] = []

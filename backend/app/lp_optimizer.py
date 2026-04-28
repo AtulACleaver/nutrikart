@@ -24,6 +24,7 @@ def allocate_budget_lp(
     max_qty_per_product: int | None = None,
     min_categories: int = 0,
     max_per_category: int | None = None,
+    health_condition: str | None = None,
 ):
     """
     Optimal budget allocation using Integer Linear Programming.
@@ -132,6 +133,7 @@ def allocate_budget_lp(
                 ranked_products, budget, household_size,
                 max_qty_per_product=max_qty_per_product,
                 min_categories=0, max_per_category=None,
+                health_condition=health_condition,
             )
         return [], round(budget, 2)
 
@@ -144,33 +146,21 @@ def allocate_budget_lp(
             continue
         subtotal = price * qty
         total_spent += subtotal
-        allocations.append(_build_allocation_lp(product, qty, subtotal, score))
+        allocations.append(_build_allocation_lp(product, qty, subtotal, score, health_condition=health_condition))
 
     allocations.sort(key=lambda a: a["score_raw"], reverse=True)
     remaining = round(budget - total_spent, 2)
     return allocations, remaining
 
-def _build_allocation_lp(product, quantity: int, subtotal: float, score: float) -> dict:
-    """Build allocation dict. Same shape as greedy for drop-in swap."""
-    # Score normalization (consistent with greedy version)
-    score100 = max(0, min(100, int((score + 150) / 150 * 100)))
-
-    return {
-        "id": product.id,
-        "name": product.name,
-        "category_id": product.category_id,
-        "category_name": getattr(product, "category_name", None),
-        "price_per_unit": float(product.price_per_unit) if product.price_per_unit else 0,
-        "quantity": quantity,
-        "subtotal": subtotal,
-        "score_raw": score,
-        "score100": score100,
-        "calories": float(product.calories) if product.calories else 0,
-        "sugar": float(product.sugar) if product.sugar else 0,
-        "protein": float(product.protein) if product.protein else 0,
-        "fiber": float(product.fiber) if product.fiber else 0,
-        "sodium": float(product.sodium) if product.sodium else 0,
-        "fat": float(product.fat) if product.fat else 0,
-        "sat_fat": float(product.saturated_fat) if product.saturated_fat else 0,
-        "image_url": product.image_url,
-    }
+def _build_allocation_lp(
+    product,
+    quantity: int,
+    subtotal: float,
+    score: float,
+    health_condition: str | None = None,
+) -> dict:
+    """Build allocation dict using shared contract with selection explanations."""
+    from app.recommendation import _build_allocation
+    return _build_allocation(
+        product, quantity, subtotal, score, health_condition=health_condition
+    )

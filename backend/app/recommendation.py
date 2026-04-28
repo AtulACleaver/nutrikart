@@ -167,10 +167,72 @@ def rank_products(products, health_condition: str | None):
 # The absolute number doesn't matter. What matters is that products with lower sugar, higher fiber, and higher protein get higher (less negative) scores relative to others.
 
 # BUDGET ALLOCATION
+def generate_selection_reason(product, health_condition: str | None, score: float) -> str:
+    """
+    Generate deterministic, numeric explanation of why a product was selected.
+    Backed by actual verified nutrient numbers, avoiding generic LLM prose.
+    """
+    cal = f"{float(product.calories):.1f} kcal" if product.calories is not None else "N/A"
+    protein = f"{float(product.protein):.1f}g protein" if product.protein is not None else "N/A"
+    sugar = f"{float(product.sugar):.1f}g sugar" if product.sugar is not None else "N/A"
+    fiber = f"{float(product.fiber):.1f}g fiber" if product.fiber is not None else "N/A"
+    sodium = f"{float(product.sodium):.1f}mg sodium" if product.sodium is not None else "N/A"
+    sat_fat = f"{float(product.saturated_fat):.1f}g sat-fat" if product.saturated_fat is not None else "N/A"
+
+    if health_condition == "diabetic":
+        return (
+            f"Selected: low sugar ({sugar} vs 5.0g limit), high fiber ({fiber}), "
+            f"protein ({protein}) [score: {score:+.1f}]."
+        )
+    elif health_condition == "hypertension":
+        return (
+            f"Selected: low sodium ({sodium} vs 140.0mg limit), "
+            f"low sat-fat ({sat_fat} vs 1.5g limit) [score: {score:+.1f}]."
+        )
+    elif health_condition == "weight_loss":
+        return (
+            f"Selected: low calories ({cal} vs 200.0 kcal limit), "
+            f"low sugar ({sugar} vs 5.0g limit), protein ({protein}) [score: {score:+.1f}]."
+        )
+    else:
+        return (
+            f"Selected: balanced nutritional density with {protein}, {fiber}, "
+            f"and energy ({cal}) [score: {score:+.1f}]."
+        )
+
+
+def explain_product_exclusion(product, health_condition: str | None) -> str:
+    """
+    Generate deterministic, numeric explanation of why a product was filtered out.
+    """
+    if getattr(product, "verification_status", None) == "unverified_unknown":
+        return "Excluded: unverified nutritional profile with unconfirmed values."
+
+    if not health_condition or health_condition not in HEALTH_CONSTRAINTS:
+        return "Excluded: disqualified by catalogue rules."
+
+    constraints = HEALTH_CONSTRAINTS[health_condition]
+    for constraint_key, max_value in constraints.items():
+        field_name = CONSTRAINT_FIELD_MAP[constraint_key]
+        product_value = get_normalized_serving_nutrient(product, field_name)
+        if product_value is None:
+            return f"Excluded: missing mandatory nutrient '{field_name}' required for {health_condition} evaluation."
+        if product_value > max_value:
+            nutrient_label = field_name.replace("_", " ")
+            unit = "mg" if constraint_key == "sodium" else ("kcal" if constraint_key == "calories" else "g")
+            return (
+                f"Excluded: {nutrient_label} ({float(product_value):.1f}{unit}/serving) "
+                f"exceeds {health_condition} limit of {float(max_value):.1f}{unit}."
+            )
+
+    return "Excluded: does not meet profile eligibility criteria."
+
+
 def allocate_budget(
     ranked_products,
     budget: float,
     household_size: int = 1,
+    health_condition: str | None = None,
 ):
     """
     Greedy budget allocation: buy from best-scored products first.
@@ -197,14 +259,14 @@ def allocate_budget(
 
         if cost <= remaining: 
             # Can afford full household quantity
-            allocations.append(_build_allocation(product, desired_qty, cost, score))
+            allocations.append(_build_allocation(product, desired_qty, cost, score, health_condition=health_condition))
             remaining -= cost
         elif price <= remaining:
             # Can't afford full qty, buy what we can
             affordable_qty = int(remaining // price)
             if affordable_qty > 0:
                 cost = price * affordable_qty
-                allocations.append(_build_allocation(product, affordable_qty, cost, score))
+                allocations.append(_build_allocation(product, affordable_qty, cost, score, health_condition=health_condition))
                 remaining -= cost
 
     return allocations, round(remaining, 2)
@@ -223,8 +285,49 @@ def get_recommendation(
     household_size: int = 1,
     use_lp: bool = True,
 ):
-    # filter (1)
-    filtered = filter_products(products, health_condition)
+    # filter and track exclusions
+    filtered = []
+    exclusions = []
+
+    for product in products:
+        if getattr(product, "verification_status", None) == "unverified_unknown":
+            exclusions.append({
+                "id": product.id,
+                "name": product.name,
+                "reason": "Excluded: unverified nutritional profile with unconfirmed values.",
+            })
+            continue
+
+        if health_condition and health_condition in HEALTH_CONSTRAINTS:
+            passes = True
+            for constraint_key, max_value in HEALTH_CONSTRAINTS[health_condition].items():
+                field_name = CONSTRAINT_FIELD_MAP[constraint_key]
+                product_value = get_normalized_serving_nutrient(product, field_name)
+
+                if product_value is None:
+                    passes = False
+                    exclusions.append({
+                        "id": product.id,
+                        "name": product.name,
+                        "reason": f"Excluded: missing mandatory nutrient '{field_name}' required for {health_condition} evaluation.",
+                    })
+                    break
+
+                if product_value > max_value:
+                    passes = False
+                    nutrient_label = field_name.replace("_", " ")
+                    unit = "mg" if constraint_key == "sodium" else ("kcal" if constraint_key == "calories" else "g")
+                    exclusions.append({
+                        "id": product.id,
+                        "name": product.name,
+                        "reason": f"Excluded: {nutrient_label} ({float(product_value):.1f}{unit}/serving) exceeds {health_condition} limit of {float(max_value):.1f}{unit}.",
+                    })
+                    break
+
+            if passes:
+                filtered.append(product)
+        else:
+            filtered.append(product)
 
     # score and rank
     ranked = rank_products(filtered, health_condition)
@@ -232,14 +335,25 @@ def get_recommendation(
     # allocate budget
     if use_lp and LP_AVAILABLE:
         allocations, remaining_budget = allocate_budget_lp(
-            ranked, budget, household_size
+            ranked, budget, household_size, health_condition=health_condition
         )
         allocation_method = "lp"
     else:
         allocations, remaining_budget = allocate_budget(
-            ranked, budget, household_size
+            ranked, budget, household_size, health_condition=health_condition
         )
         allocation_method = "greedy"
+
+    # track products excluded from final cart due to budget limits
+    allocated_ids = {a["id"] for a in allocations}
+    for product, score in ranked:
+        if product.id not in allocated_ids:
+            price = float(product.price_per_unit) if product.price_per_unit else 0.0
+            exclusions.append({
+                "id": product.id,
+                "name": product.name,
+                "reason": f"Excluded: price ₹{price:.2f} exceeds remaining budget of ₹{remaining_budget:.2f}.",
+            })
 
     # summary stats
     total_spent = sum(a["subtotal"] for a in allocations)
@@ -248,6 +362,7 @@ def get_recommendation(
 
     return {
         "recommendations": allocations,
+        "exclusions": exclusions,
         "summary": {
             "total_products": len(allocations),
             "total_spent": round(total_spent, 2),
@@ -267,7 +382,14 @@ def get_recommendation(
         },
     }
 
-def _build_allocation(product, quantity: int, subtotal: float, score: float) -> dict:
+
+def _build_allocation(
+    product,
+    quantity: int,
+    subtotal: float,
+    score: float,
+    health_condition: str | None = None,
+) -> dict:
     # Basic normalization: assume scores mostly fall between -150 and 0.
     # Map -150 -> 0, 0 -> 100.
     score100 = max(0, min(100, int((score + 150) / 150 * 100)))
@@ -296,4 +418,5 @@ def _build_allocation(product, quantity: int, subtotal: float, score: float) -> 
         "verification_status": getattr(product, "verification_status", "verified"),
         "source_ref": getattr(product, "source_ref", None),
         "is_fallback": True,
+        "selection_reason": generate_selection_reason(product, health_condition, score),
     }
