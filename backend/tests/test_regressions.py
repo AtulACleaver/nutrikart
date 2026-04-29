@@ -60,14 +60,11 @@ def test_missing_nutrients_preserved_as_none():
     assert allocation["sodium"] is None, "Missing sodium preserved as None"
 
 
-def test_reproduce_empty_recommendation_raises_http_404():
+def test_empty_recommendation_returns_200_with_diagnostics():
     """
-    REG-04 REPRODUCTION:
-    Demonstrates that /recommend raises an HTTP 404 error when budget is too low
-    or no products match, causing frontend to display a network/server failure.
-    
-    Existing behavior: raises HTTPException(status_code=404)
-    Desired behavior (Upgrade 2): return HTTP 200 with empty recommendations list and diagnostic summary.
+    REG-04 RESOLVED:
+    /recommend returns HTTP 200 with empty recommendations list and diagnostic summary
+    when budget is too low or no products match, preventing raw error crashes.
     """
     # Extremely low budget ensures no product can be allocated
     response = client.post(
@@ -75,6 +72,8 @@ def test_reproduce_empty_recommendation_raises_http_404():
         json={"budget": 1.0, "health_condition": "diabetic", "household_size": 1}
     )
     
-    # In current baseline, HTTP 404 is returned
-    assert response.status_code == 404
-    assert "No products match your criteria" in response.json()["detail"]
+    assert response.status_code == 200
+    data = response.json()
+    assert data["recommendations"] == []
+    assert "No products match your criteria" in data["summary"]["message"]
+    assert "exclusions" in data

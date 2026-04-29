@@ -92,6 +92,7 @@ class RecommendSummary(BaseModel):
     is_fallback: bool = True
     freshness_status: str = "verified_static_baseline"
     disclaimer: str = "NutriKart recommendations apply heuristic nutrient limits to verified food data. Not clinical advice."
+    message: str | None = None
 
 class RecommendResponse(BaseModel):
     recommendations: list[RecommendProduct]

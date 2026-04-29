@@ -45,12 +45,9 @@ def recommend(
 
     # ── Handle empty results ──
     if not result["recommendations"]:
-        raise HTTPException(
-            status_code=404,
-            detail=(
-                "No products match your criteria. "
-                "Try increasing your budget or removing health condition filters."
-            ),
+        result["summary"]["message"] = (
+            "No products match your criteria. "
+            "Try increasing your budget or removing health condition filters."
         )
 
     # ── Add category names ──
