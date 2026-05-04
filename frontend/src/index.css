@@ -1,19 +1,81 @@
+@import url("https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;600;700&display=swap");
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
-
 @theme {
-    --color-bg: rgb(10 10 12);
-	--color-surface: rgb(18 18 22);
-	--color-card: rgb(24 24 28);
-	--color-border: rgb(40 40 48);
-	--color-text: rgb(244 244 245);
-	--color-muted: rgb(161 161 170);
-	--color-accent: rgb(34 197 94);
-	--color-danger: rgb(239 68 68);
-	--shadow-soft: 0 10px 30px rgba(0,0,0,0.35);
+  --color-ground: #f5ead8;
+  --color-surface: #ebddc5;
+  --color-ink: #201e1d;
+  --color-divider: color-mix(in srgb, #201e1d 16%, transparent);
+
+  --color-neutral-100: #f9f4ed;
+  --color-neutral-200: #eee7db;
+  --color-neutral-300: #dcd3c4;
+  --color-neutral-400: #c0b6a5;
+  --color-neutral-500: #a19786;
+  --color-neutral-600: #82796a;
+  --color-neutral-700: #645c50;
+  --color-neutral-800: #474238;
+  --color-neutral-900: #2e2b25;
+
+  --color-terracotta-100: #fff2eb;
+  --color-terracotta-200: #ffe1d0;
+  --color-terracotta-300: #ffc6a5;
+  --color-terracotta-400: #f6a06b;
+  --color-terracotta-500: #c67139;
+  --color-terracotta-600: #b2622d;
+  --color-terracotta-700: #8c491a;
+  --color-terracotta-800: #643312;
+  --color-terracotta-900: #402310;
+
+  --color-sage-100: #f0fae1;
+  --color-sage-200: #e1eecc;
+  --color-sage-300: #ccdbb2;
+  --color-sage-400: #aebf92;
+  --color-sage-500: #7a8a5e;
+  --color-sage-600: #728157;
+  --color-sage-700: #56633f;
+  --color-sage-800: #3d472b;
+  --color-sage-900: #272e1b;
+
+  --font-display: "Caprasimo", system-ui, sans-serif;
+  --font-sans: "Figtree", system-ui, sans-serif;
+
+  --radius-option: 24px;   /* condition cards, inner panels */
+  --radius-tile: 28px;     /* product tiles, cards, verdicts */
+  --radius-panel: 36px;    /* form panel, drawer, dialogs, sheets */
+  --radius-hero: 40px;     /* result panel, summary card */
+
+  --shadow-sm: 0 1px 2px color-mix(in srgb, #2e2b25 14%, transparent);
+  --shadow-md: 0 3px 10px color-mix(in srgb, #2e2b25 16%, transparent);
+  --shadow-lg: 0 12px 32px color-mix(in srgb, #2e2b25 22%, transparent);
+
+  --breakpoint-md: 48rem;   /* 768 */
+  --breakpoint-lg: 64rem;   /* 1024 */
+  --breakpoint-xl: 75rem;   /* 1200 */
 }
 
 :root {
-    color-scheme: dark;
+  color-scheme: light;
+}
+
+body {
+  background-color: var(--color-ground, #f5ead8);
+  color: var(--color-ink, #201e1d);
+  font-family: var(--font-sans, "Figtree", sans-serif);
+  font-size: 16px;
+  line-height: 1.55;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display, "Caprasimo", serif);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 1.05;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-terracotta-500, #c67139);
+  outline-offset: 2px;
 }
