@@ -63,7 +63,7 @@ export default function Cart() {
 		return (
 			<div className="p-8 text-center">
 				<p className="text-muted text-lg">Your cart is empty.</p>
-				<Link to="/" className="mt-4 inline-block text-accent font-semibold">
+				<Link to="/shop" className="mt-4 inline-block text-accent font-semibold">
 					← Browse products
 				</Link>
 			</div>

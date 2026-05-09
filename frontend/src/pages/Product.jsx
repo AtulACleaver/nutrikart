@@ -38,7 +38,7 @@ export default function Product() {
 
 	return (
 		<div className="max-w-2xl mx-auto p-6">
-			<Link to="/" className="text-muted text-sm mb-4 inline-block">← Back to browse</Link>
+			<Link to="/shop" className="text-muted text-sm mb-4 inline-block">← Back to browse</Link>
 			<img
 				src={product.image_url}
 				alt={product.name}
