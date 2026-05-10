@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { exportCartPdf } from "../utils/exportPDF";
 import HealthFilters from "../components/HealthFilters";
 import RecommendationPanel from "../components/RecommendationPanel";
+import AppLayout from "../components/AppLayout";
 
 export default function Cart() {
 	const { entries, totalItems, totalCost, setQty, clear } = useCart();
@@ -61,17 +62,20 @@ export default function Cart() {
 
 	if (totalItems === 0) {
 		return (
-			<div className="p-8 text-center">
-				<p className="text-muted text-lg">Your cart is empty.</p>
-				<Link to="/shop" className="mt-4 inline-block text-accent font-semibold">
-					← Browse products
-				</Link>
-			</div>
+			<AppLayout>
+				<div className="p-8 text-center max-w-[480px] mx-auto py-16">
+					<p className="text-[var(--color-neutral-700,#645c50)] text-lg mb-4">Your basket is empty.</p>
+					<Link to="/shop" className="px-5 py-2.5 rounded-full bg-[var(--color-sage-700,#56633f)] text-white font-semibold inline-block">
+						Start shopping
+					</Link>
+				</div>
+			</AppLayout>
 		);
 	}
 
 	return (
-		<div className="max-w-6xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+		<AppLayout>
+			<div className="py-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
 			{/* LEFT COLUMN: Cart items and totals */}
 			<div>
 				<h1 className="text-2xl font-bold mb-4">Your cart</h1>
@@ -133,6 +137,7 @@ export default function Cart() {
 				<h2 className="text-lg font-bold mb-2">Recommendations</h2>
 				<RecommendationPanel recommendations={recommendations} loading={recsLoading} />
 			</div>
-		</div>
+			</div>
+		</AppLayout>
 	);
 }

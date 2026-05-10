@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { getCategories, getProducts } from "../api/catalog";
-import TopBar from "../components/TopBar";
+import AppLayout from "../components/AppLayout";
 import CategoryChips from "../components/CategoryChips";
 import ProductGrid from "../components/ProductGrid";
 import CartDrawer from "../components/CartDrawer";
 
-export default function Home() {
+export default function Shop() {
 	const [categories, setCategories] = useState([]);
 	const [products, setProducts] = useState([]);
 	const [activeCategory, setActiveCategory] = useState(null);
@@ -49,9 +49,8 @@ export default function Home() {
 	}, [activeCategory, reloadKey]);
 
 	return (
-		<div className="min-h-screen bg-bg">
-			<TopBar onCartClick={() => setDrawerOpen(true)} />
-			<div className="max-w-6xl mx-auto px-4 pt-4">
+		<AppLayout onCartClick={() => setDrawerOpen(true)}>
+			<div className="pt-4">
 				<CategoryChips
 					categories={categories}
 					activeId={activeCategory}
@@ -59,29 +58,29 @@ export default function Home() {
 				/>
 				{loading ? (
 					slow ? (
-						<p className="mt-8 text-center text-muted">
+						<p className="mt-8 text-center text-[var(--color-neutral-700,#645c50)]">
 							Waking up the server (free hosting sleeps when idle). This can take up to a minute...
 						</p>
 					) : (
-						<p className="mt-8 text-center text-muted">Loading products...</p>
+						<p className="mt-8 text-center text-[var(--color-neutral-700,#645c50)]">Loading products...</p>
 					)
 				) : error ? (
 					<div className="mt-8 text-center">
-						<p className="text-danger mb-4">Could not reach the NutriKart API.</p>
+						<p className="text-[var(--color-terracotta-700,#8c491a)] mb-4">Could not reach the NutriKart API.</p>
 						<button
 							onClick={() => setReloadKey((k) => k + 1)}
-							className="px-4 py-2 rounded-xl bg-accent text-black font-semibold"
+							className="px-5 py-2.5 rounded-full bg-[var(--color-sage-700,#56633f)] text-white font-semibold cursor-pointer"
 						>
 							Try again
 						</button>
 					</div>
 				) : products.length === 0 ? (
-					<p className="mt-8 text-center text-muted">No products found.</p>
+					<p className="mt-8 text-center text-[var(--color-neutral-700,#645c50)]">No products found.</p>
 				) : (
 					<ProductGrid products={products} />
 				)}
 			</div>
 			<CartDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
-		</div>
+		</AppLayout>
 	);
 }

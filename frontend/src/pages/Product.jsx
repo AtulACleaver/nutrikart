@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { getProduct } from "../api/catalog";
 import { useCart } from "../store/cartContext";
 import NutritionTable from "../components/NutritionTable";
+import AppLayout from "../components/AppLayout";
 
 export default function Product() {
 	// useParams() extracts the :id from the URL.
@@ -29,15 +30,28 @@ export default function Product() {
 		return () => { cancelled = true; };
 	}, [productId]);
 
-	if (loading) return <div className="p-8 text-muted">Loading...</div>;
-	if (!product) return <div className="p-8 text-danger">Product not found.</div>;
+	if (loading) {
+		return (
+			<AppLayout>
+				<div className="p-8 text-[var(--color-neutral-700,#645c50)]">Loading product...</div>
+			</AppLayout>
+		);
+	}
+	if (!product) {
+		return (
+			<AppLayout>
+				<div className="p-8 text-[var(--color-terracotta-700,#8c491a)]">Product not found.</div>
+			</AppLayout>
+		);
+	}
 
 	// Check if this product is already in the cart to show current quantity.
 	const inCart = itemsById[product.id];
 	const currentQty = inCart ? inCart.quantity : 0;
 
 	return (
-		<div className="max-w-2xl mx-auto p-6">
+		<AppLayout>
+			<div className="max-w-2xl mx-auto py-6">
 			<Link to="/shop" className="text-muted text-sm mb-4 inline-block">← Back to browse</Link>
 			<img
 				src={product.image_url}
@@ -77,6 +91,7 @@ export default function Product() {
 					</div>
 				)}
 			</div>
-		</div>
+			</div>
+		</AppLayout>
 	);
 }
