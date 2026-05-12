@@ -4,12 +4,12 @@ import {
   FIXTURE_RECOMMENDATIONS_EMPTY,
 } from "./fixtures";
 
-export const getRecommendations = async (payload) => {
+export const getRecommendations = async (payload, options = {}) => {
   if (isFixtureMode()) {
     if (payload.budget < 50) {
       return FIXTURE_RECOMMENDATIONS_EMPTY;
     }
     return FIXTURE_RECOMMENDATIONS_DIABETIC;
   }
-  return (await api.post("/recommend", payload)).data;
+  return (await api.post("/recommend", payload, options)).data;
 };

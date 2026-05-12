@@ -1,24 +1,108 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import AppLayout from '../components/AppLayout';
 import ConditionPicker from '../components/ConditionPicker';
 import BudgetField from '../components/BudgetField';
-import { QtyStepper, Button } from '../components/ui';
+import { QtyStepper, Button, EmptyState, Skeleton } from '../components/ui';
 import { useProfile } from '../store/ProfileContext';
+import { getRecommendations } from '../api/recommend';
+import { formatPrice } from '../utils/formatPrice';
+import { AlertCircle, RotateCcw, SlidersHorizontal, Sparkles } from 'lucide-react';
 
 export default function Plan() {
   const { profile, setCondition, setBudget, setHousehold } = useProfile();
 
+  const [requestState, setRequestState] = useState('idle'); // 'idle' | 'loading' | 'result' | 'empty' | 'error'
+  const [isSlow, setIsSlow] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [planResult, setPlanResult] = useState(null);
+
+  const slowTimerRef = useRef(null);
+  const timeoutTimerRef = useRef(null);
+  const abortControllerRef = useRef(null);
+  const formRef = useRef(null);
+
   const isBudgetValid = profile.budget >= 50;
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  useEffect(() => {
+    return () => {
+      clearTimeout(slowTimerRef.current);
+      clearTimeout(timeoutTimerRef.current);
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
+  const handleGeneratePlan = async (e) => {
+    if (e) e.preventDefault();
     if (!isBudgetValid) return;
-    // In prompt 7, recommendation generation is wired up here
-    console.log('Generating plan with payload:', {
-      budget: profile.budget,
-      health_condition: profile.condition,
-      household_size: profile.household,
-    });
+
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    clearTimeout(slowTimerRef.current);
+    clearTimeout(timeoutTimerRef.current);
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    setRequestState('loading');
+    setIsSlow(false);
+    setErrorMessage(null);
+
+    // 4 second slow progress disclosure
+    slowTimerRef.current = setTimeout(() => {
+      setIsSlow(true);
+    }, 4000);
+
+    // 45 second client cancellation timeout
+    timeoutTimerRef.current = setTimeout(() => {
+      controller.abort();
+      setRequestState('error');
+      setErrorMessage('The request timed out after 45 seconds. The server may be waking up.');
+    }, 45000);
+
+    try {
+      const payload = {
+        budget: profile.budget,
+        health_condition: profile.condition,
+        household_size: profile.household,
+      };
+
+      const data = await getRecommendations(payload, { signal: controller.signal });
+
+      clearTimeout(slowTimerRef.current);
+      clearTimeout(timeoutTimerRef.current);
+
+      if (!data.recommendations || data.recommendations.length === 0) {
+        setPlanResult(data);
+        setRequestState('empty');
+      } else {
+        setPlanResult(data);
+        setRequestState('result');
+      }
+    } catch (err) {
+      if (err.name === 'CanceledError' || err.name === 'AbortError') {
+        return;
+      }
+      clearTimeout(slowTimerRef.current);
+      clearTimeout(timeoutTimerRef.current);
+
+      setRequestState('error');
+      const isNetworkDrop = typeof navigator !== 'undefined' && !navigator.onLine;
+      setErrorMessage(
+        isNetworkDrop
+          ? 'Network connection lost. Please check your internet connection and retry.'
+          : err.response?.data?.detail || err.message || 'Server error while calculating optimal plan.'
+      );
+    }
+  };
+
+  const handleResetToForm = () => {
+    setRequestState('idle');
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 50);
   };
 
   return (
@@ -34,10 +118,11 @@ export default function Plan() {
           </p>
         </div>
 
-        {/* Plan Input Form Card */}
+        {/* Form Card (always retains user inputs) */}
         <form
-          onSubmit={handleSubmit}
-          className="bg-[var(--color-surface,#ebddc5)]/60 rounded-[36px] border border-[var(--color-divider)] p-6 md:p-10 shadow-sm flex flex-col gap-8 max-w-[840px]"
+          ref={formRef}
+          onSubmit={handleGeneratePlan}
+          className="bg-[var(--color-surface,#ebddc5)]/60 rounded-[36px] border border-[var(--color-divider)] p-6 md:p-10 shadow-sm flex flex-col gap-8 max-w-[840px] mb-12"
         >
           {/* Step 1: Health Condition Selection */}
           <section aria-labelledby="condition-step-title">
@@ -107,10 +192,10 @@ export default function Plan() {
               type="submit"
               variant="plan"
               size="xl"
-              disabled={!isBudgetValid}
+              disabled={!isBudgetValid || requestState === 'loading'}
               className="w-full sm:w-auto"
             >
-              Generate kitchen plan
+              {requestState === 'loading' ? 'Optimizing basket...' : 'Generate kitchen plan'}
             </Button>
 
             <p className="text-[12px] text-[var(--color-neutral-700,#645c50)] leading-tight text-center sm:text-right max-w-[340px]">
@@ -118,6 +203,115 @@ export default function Plan() {
             </p>
           </footer>
         </form>
+
+        {/* Dynamic Request States Section */}
+        <section aria-live="polite" className="max-w-[840px]">
+          {/* Loading State */}
+          {requestState === 'loading' && (
+            <div className="p-8 rounded-[36px] bg-[var(--color-surface,#ebddc5)]/40 border border-[var(--color-divider)] flex flex-col gap-6">
+              <div className="flex items-center gap-3">
+                <Sparkles size={24} className="text-[var(--color-sage-700,#56633f)] animate-spin" />
+                <h3 className="font-['Caprasimo',serif] text-[22px] text-[var(--color-ink,#201e1d)]">
+                  Assembling optimal basket...
+                </h3>
+              </div>
+
+              {isSlow && (
+                <div className="p-4 rounded-2xl bg-[var(--color-sage-100,#f0fae1)] text-[var(--color-sage-900,#272e1b)] text-[14px] leading-relaxed">
+                  Crunching nutritional fits and integer unit prices... (free-tier servers may take a moment to wake up).
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <Skeleton height="56px" radius="rounded-2xl" />
+                <Skeleton height="56px" radius="rounded-2xl" />
+                <Skeleton height="56px" radius="rounded-2xl" />
+              </div>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {requestState === 'empty' && (
+            <div className="p-8 rounded-[36px] bg-[var(--color-surface,#ebddc5)]/40 border border-[var(--color-divider)]">
+              <EmptyState
+                tone="terracotta"
+                title={`No basket matches ${formatPrice(profile.budget)}`}
+                body={
+                  planResult?.summary?.message ||
+                  'The combination of dietary limits and budget was too tight to allocate minimum whole-household quantities. Try increasing your budget or adjusting dietary limits.'
+                }
+                primaryAction={
+                  <Button variant="secondary" size="md" onClick={handleResetToForm}>
+                    <SlidersHorizontal size={16} strokeWidth={2.75} />
+                    Adjust inputs
+                  </Button>
+                }
+              />
+            </div>
+          )}
+
+          {/* Error State */}
+          {requestState === 'error' && (
+            <div className="p-8 rounded-[36px] bg-[var(--color-surface,#ebddc5)]/40 border border-[var(--color-divider)]">
+              <EmptyState
+                tone="terracotta"
+                title="Could not generate plan"
+                body={errorMessage || 'An unexpected error occurred while calculating recommendations.'}
+                primaryAction={
+                  <Button variant="plan" size="md" onClick={handleGeneratePlan}>
+                    <RotateCcw size={16} strokeWidth={2.75} />
+                    Retry
+                  </Button>
+                }
+                secondaryAction={
+                  <Button variant="secondary" size="md" onClick={handleResetToForm}>
+                    Edit parameters
+                  </Button>
+                }
+              />
+            </div>
+          )}
+
+          {/* Result State (Placeholder until prompt 8) */}
+          {requestState === 'result' && planResult && (
+            <div className="p-8 rounded-[36px] bg-[var(--color-ground,#f5ead8)] border border-[var(--color-divider)] shadow-md flex flex-col gap-6 animate-in fade-in">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-[var(--color-divider)]">
+                <div>
+                  <h3 className="font-['Caprasimo',serif] text-[26px] text-[var(--color-ink,#201e1d)]">
+                    Optimal Kitchen Basket
+                  </h3>
+                  <p className="text-[14px] text-[var(--color-neutral-700,#645c50)]">
+                    {planResult.recommendations.length} items allocated • Spent {formatPrice(planResult.summary.total_spent)} of {formatPrice(planResult.summary.budget)}
+                  </p>
+                </div>
+                <Button variant="secondary" size="sm" onClick={handleResetToForm}>
+                  Edit plan
+                </Button>
+              </div>
+
+              <div className="space-y-3">
+                {planResult.recommendations.map((item) => (
+                  <div
+                    key={item.id}
+                    className="p-4 rounded-2xl bg-[var(--color-surface,#ebddc5)] flex items-center justify-between"
+                  >
+                    <div>
+                      <h4 className="font-bold text-[16px] text-[var(--color-ink,#201e1d)]">
+                        {item.name}
+                      </h4>
+                      <p className="text-[13px] text-[var(--color-neutral-700,#645c50)]">
+                        {item.quantity} units × {formatPrice(item.price_per_unit)} • {item.selection_reason}
+                      </p>
+                    </div>
+                    <span className="font-['Caprasimo',serif] text-[18px] text-[var(--color-ink,#201e1d)]">
+                      {formatPrice(item.subtotal)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
       </div>
     </AppLayout>
   );
