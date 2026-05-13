@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import AppLayout from '../components/AppLayout';
 import ConditionPicker from '../components/ConditionPicker';
 import BudgetField from '../components/BudgetField';
+import PlanResult from '../components/PlanResult';
 import { QtyStepper, Button, EmptyState, Skeleton } from '../components/ui';
 import { useProfile } from '../store/ProfileContext';
 import { getRecommendations } from '../api/recommend';
@@ -272,44 +273,12 @@ export default function Plan() {
             </div>
           )}
 
-          {/* Result State (Placeholder until prompt 8) */}
+          {/* Result State with Editable PlanResult */}
           {requestState === 'result' && planResult && (
-            <div className="p-8 rounded-[36px] bg-[var(--color-ground,#f5ead8)] border border-[var(--color-divider)] shadow-md flex flex-col gap-6 animate-in fade-in">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-[var(--color-divider)]">
-                <div>
-                  <h3 className="font-['Caprasimo',serif] text-[26px] text-[var(--color-ink,#201e1d)]">
-                    Optimal Kitchen Basket
-                  </h3>
-                  <p className="text-[14px] text-[var(--color-neutral-700,#645c50)]">
-                    {planResult.recommendations.length} items allocated • Spent {formatPrice(planResult.summary.total_spent)} of {formatPrice(planResult.summary.budget)}
-                  </p>
-                </div>
-                <Button variant="secondary" size="sm" onClick={handleResetToForm}>
-                  Edit plan
-                </Button>
-              </div>
-
-              <div className="space-y-3">
-                {planResult.recommendations.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-4 rounded-2xl bg-[var(--color-surface,#ebddc5)] flex items-center justify-between"
-                  >
-                    <div>
-                      <h4 className="font-bold text-[16px] text-[var(--color-ink,#201e1d)]">
-                        {item.name}
-                      </h4>
-                      <p className="text-[13px] text-[var(--color-neutral-700,#645c50)]">
-                        {item.quantity} units × {formatPrice(item.price_per_unit)} • {item.selection_reason}
-                      </p>
-                    </div>
-                    <span className="font-['Caprasimo',serif] text-[18px] text-[var(--color-ink,#201e1d)]">
-                      {formatPrice(item.subtotal)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <PlanResult
+              result={planResult}
+              onEditPlan={handleResetToForm}
+            />
           )}
         </section>
       </div>

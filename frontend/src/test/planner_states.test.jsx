@@ -4,6 +4,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { ProfileProvider } from '../store/ProfileContext';
 import { CartProvider } from '../store/cartContext';
+import { ToastProvider } from '../components/ui/Toast';
 import Plan from '../pages/Plan';
 import * as recommendApi from '../api/recommend';
 
@@ -35,7 +36,9 @@ describe('Planner Request States', () => {
       <MemoryRouter>
         <ProfileProvider>
           <CartProvider>
-            <Plan />
+            <ToastProvider>
+              <Plan />
+            </ToastProvider>
           </CartProvider>
         </ProfileProvider>
       </MemoryRouter>
@@ -45,7 +48,7 @@ describe('Planner Request States', () => {
     fireEvent.click(submitBtn);
 
     await waitFor(() => {
-      expect(screen.getByText('Optimal Kitchen Basket')).toBeInTheDocument();
+      expect(screen.getByText(/recommended items/i)).toBeInTheDocument();
       expect(screen.getByText('Daawat Rice Flour - 500 g')).toBeInTheDocument();
     });
   });
@@ -62,7 +65,9 @@ describe('Planner Request States', () => {
       <MemoryRouter>
         <ProfileProvider>
           <CartProvider>
-            <Plan />
+            <ToastProvider>
+              <Plan />
+            </ToastProvider>
           </CartProvider>
         </ProfileProvider>
       </MemoryRouter>
@@ -86,7 +91,9 @@ describe('Planner Request States', () => {
       <MemoryRouter>
         <ProfileProvider>
           <CartProvider>
-            <Plan />
+            <ToastProvider>
+              <Plan />
+            </ToastProvider>
           </CartProvider>
         </ProfileProvider>
       </MemoryRouter>
