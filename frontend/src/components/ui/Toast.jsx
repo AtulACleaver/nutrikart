@@ -14,11 +14,16 @@ export function ToastProvider({ children }) {
     setToast(null);
   }, []);
 
-  const showToast = useCallback(({ message, actionLabel, onAction, duration }) => {
+  const showToast = useCallback((msgOrOptions, maybeOptions = {}) => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
     }
 
+    const opts = typeof msgOrOptions === 'string'
+      ? { message: msgOrOptions, ...maybeOptions }
+      : (msgOrOptions || {});
+
+    const { message, actionLabel, onAction, duration } = opts;
     const effectiveDuration = duration || (actionLabel ? 5000 : 3000);
 
     setToast({

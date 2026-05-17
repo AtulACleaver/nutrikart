@@ -1,143 +1,296 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ShoppingBasket, FileDown, ArrowLeft, Trash2 } from "lucide-react";
 import { useCart } from "../store/cartContext";
-import { getRecommendations } from "../api/recommend";
-import { debounce } from "../utils/debounce";
-import { Link } from "react-router-dom";
-import { exportCartPdf } from "../utils/exportPDF";
-import HealthFilters from "../components/HealthFilters";
-import RecommendationPanel from "../components/RecommendationPanel";
+import { useProfile } from "../store/ProfileContext";
+import { useToast, ConfirmDialog, Button, Tag, EmptyState } from "../components/ui";
+import BasketRow from "../components/BasketRow";
 import AppLayout from "../components/AppLayout";
+import { formatPrice } from "../utils/formatPrice";
+import { exportCartPdf } from "../utils/exportPDF";
 
 export default function Cart() {
-	const { entries, totalItems, totalCost, setQty, clear } = useCart();
+  const navigate = useNavigate();
+  const { entries, totalItems, totalCost, setQty, clear, restoreItems } = useCart();
+  const { profile, evaluateProduct, getTags } = useProfile();
+  const { showToast } = useToast();
 
-	// User settings for the recommendation engine.
-	// These live in local component state because they only matter on this page.
-	const [budget, setBudget] = useState(500);
-	const [householdSize, setHouseholdSize] = useState(2);
-	const [healthCondition, setHealthCondition] = useState("none");
-	const [recommendations, setRecommendations] = useState([]);
-	const [recsLoading, setRecsLoading] = useState(false);
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false);
 
-	// Build the API payload from current cart state.
-	// useMemo ensures this only recomputes when entries change,
-	// not on every render.
-	const cartPayload = useMemo(
-		() => entries.map((e) => ({ product_id: e.product.id, quantity: e.quantity })),
-		[entries]
-	);
+  // Check last plan state
+  const lastPlanData = useMemo(() => {
+    try {
+      const stored = localStorage.getItem("nk.lastPlan");
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  }, []);
 
-	// Debounced fetch function. useCallback ensures the debounced function
-	// is stable across renders (same reference), so the useEffect below
-	// doesn't re-trigger unnecessarily.
-	const fetchRecs = useCallback(
-		debounce(async (payload, budget, healthCondition, householdSize) => {
-			if (payload.length === 0) {
-				setRecommendations([]);
-				return;
-			}
-			setRecsLoading(true);
-			try {
-			const data = await getRecommendations({
-					budget,
-					health_condition: healthCondition === "none" ? null : healthCondition,
-					household_size: householdSize,
-				});
-				setRecommendations(data.recommendations || []);
-			} catch (err) {
-				console.error("Recommendation fetch failed:", err);
-			} finally {
-				setRecsLoading(false);
-			}
-		}, 400),
-		[]
-	);
+  const planStatusTag = useMemo(() => {
+    if (!lastPlanData || !lastPlanData.items || entries.length === 0) return null;
+    const planItems = lastPlanData.items;
 
-	// Fire recommendation fetch whenever any input changes.
-	// The debounce inside fetchRecs ensures rapid changes
-	// (like adjusting quantity multiple times) only trigger one API call.
-	useEffect(() => {
-		fetchRecs(cartPayload, budget, healthCondition, householdSize);
-	}, [cartPayload, budget, healthCondition, householdSize, fetchRecs]);
+    // Check if items and quantities match exactly
+    const matchesExactly =
+      planItems.length === entries.length &&
+      planItems.every((pi) => {
+        const found = entries.find((e) => e.product.id === pi.product.id);
+        return found && found.quantity === pi.qty;
+      });
 
-	if (totalItems === 0) {
-		return (
-			<AppLayout>
-				<div className="p-8 text-center max-w-[480px] mx-auto py-16">
-					<p className="text-[var(--color-neutral-700,#645c50)] text-lg mb-4">Your basket is empty.</p>
-					<Link to="/shop" className="px-5 py-2.5 rounded-full bg-[var(--color-sage-700,#56633f)] text-white font-semibold inline-block">
-						Start shopping
-					</Link>
-				</div>
-			</AppLayout>
-		);
-	}
+    if (matchesExactly) {
+      const conditionName =
+        lastPlanData.condition === "diabetic"
+          ? "Diabetic"
+          : lastPlanData.condition === "hypertension"
+          ? "Hypertension"
+          : lastPlanData.condition === "weight_loss"
+          ? "Weight-loss"
+          : "Health";
+      return `From your ${conditionName} plan`;
+    }
 
-	return (
-		<AppLayout>
-			<div className="py-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
-			{/* LEFT COLUMN: Cart items and totals */}
-			<div>
-				<h1 className="text-2xl font-bold mb-4">Your cart</h1>
-				{entries.map((e) => (
-					<div key={e.product.id} className="flex items-center gap-4 py-3 border-b border-border">
-						<img src={e.product.image_url} alt={e.product.name}
-							className="w-16 h-16 rounded-lg object-cover bg-surface" />
-						<div className="flex-1">
-							<div className="font-semibold">{e.product.name}</div>
-							<div className="text-sm text-muted">₹{e.product.price_per_unit} each</div>
-						</div>
-						<div className="flex items-center gap-2">
-							<button onClick={() => setQty(e.product.id, e.quantity - 1)}
-								className="w-8 h-8 rounded-full bg-surface border border-border">−</button>
-							<span className="w-6 text-center">{e.quantity}</span>
-							<button onClick={() => setQty(e.product.id, e.quantity + 1)}
-								className="w-8 h-8 rounded-full bg-surface border border-border">+</button>
-						</div>
-						<div className="font-bold w-20 text-right">
-							₹{e.product.price_per_unit * e.quantity}
-						</div>
-					</div>
-				))}
-				<div className="mt-4 flex justify-between text-lg font-bold">
-					<span>Total ({totalItems} items)</span>
-					<span>₹{totalCost}</span>
-				</div>
-				<button onClick={clear}
-					className="mt-2 text-sm text-danger">Clear cart</button>
+    return "Edited from your plan";
+  }, [lastPlanData, entries]);
 
-				<button
-					onClick={() => exportCartPdf(entries, totalCost, healthCondition)}
-					className="mt-4 w-full py-3 rounded-xl bg-accent text-black font-bold"
-				>
-					Export PDF
-				</button>
-			</div>
+  // Profile fit breakdown
+  const fitBreakdown = useMemo(() => {
+    if (!profile.condition) return null;
+    let fitsCount = 0;
+    let misfitCount = 0;
 
-			{/* RIGHT COLUMN: Health filters + Recommendations */}
-			<div>
-				{/* Health condition filter */}
-				<HealthFilters active={healthCondition} onSelect={setHealthCondition} />
+    entries.forEach(({ product }) => {
+      const ev = evaluateProduct(product);
+      if (ev.fits) fitsCount++;
+      else misfitCount++;
+    });
 
-				{/* Budget and household inputs */}
-				<div className="flex gap-4 mb-4">
-					<label className="flex-1">
-						<span className="text-sm text-muted">Budget (₹)</span>
-						<input type="number" value={budget} onChange={(e) => setBudget(Number(e.target.value))}
-							className="mt-1 w-full px-3 py-2 bg-surface border border-border rounded-lg" />
-					</label>
-					<label className="flex-1">
-						<span className="text-sm text-muted">Household size</span>
-						<input type="number" value={householdSize} onChange={(e) => setHouseholdSize(Number(e.target.value))}
-							className="mt-1 w-full px-3 py-2 bg-surface border border-border rounded-lg" />
-					</label>
-				</div>
+    return {
+      fitsCount,
+      misfitCount,
+      allFit: misfitCount === 0,
+    };
+  }, [profile.condition, entries, evaluateProduct]);
 
-				{/* Recommendations panel */}
-				<h2 className="text-lg font-bold mb-2">Recommendations</h2>
-				<RecommendationPanel recommendations={recommendations} loading={recsLoading} />
-			</div>
-			</div>
-		</AppLayout>
-	);
+  // Handle single item removal
+  const handleRemoveItem = (product, previousQty) => {
+    setQty(product.id, 0);
+    showToast(`${product.name} removed`, {
+      actionLabel: "Undo",
+      onAction: () => setQty(product.id, previousQty),
+    });
+  };
+
+  // Handle clear basket confirmation
+  const handleConfirmClear = () => {
+    const snapshot = [...entries];
+    clear();
+    setConfirmClearOpen(false);
+    showToast("Basket cleared", {
+      actionLabel: "Undo",
+      onAction: () => restoreItems(snapshot),
+    });
+  };
+
+  // Handle PDF Export
+  const handleExport = () => {
+    try {
+      exportCartPdf(entries, totalCost, profile);
+      showToast("Shopping list downloaded");
+    } catch (err) {
+      console.error("PDF export failed:", err);
+      showToast("Could not generate PDF");
+    }
+  };
+
+  if (totalItems === 0) {
+    return (
+      <AppLayout>
+        <div className="max-w-[1152px] mx-auto px-5 md:px-8 py-20">
+          <EmptyState
+            tone="sage"
+            icon={<ShoppingBasket size={32} strokeWidth={2.5} />}
+            title="Your basket is empty"
+            body="Build one around your health in about a minute, or browse the shelves yourself."
+            primaryAction={
+              <Button variant="plan" size="md" onClick={() => navigate("/")}>
+                Plan a basket
+              </Button>
+            }
+            secondaryAction={
+              <Button variant="secondary" size="md" onClick={() => navigate("/shop")}>
+                Browse shop
+              </Button>
+            }
+          />
+        </div>
+      </AppLayout>
+    );
+  }
+
+  const budget = profile.budget || 0;
+  const underBudget = budget > 0 ? budget - totalCost : 0;
+  const budgetRatio = budget > 0 ? Math.min(1.2, totalCost / budget) : 0;
+
+  return (
+    <AppLayout>
+      <div className="max-w-[1152px] mx-auto px-5 md:px-8 py-6 md:py-10">
+        {/* Mobile Header / Desktop Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8 lg:gap-14 items-start">
+          {/* Left Column: Items List */}
+          <div>
+            <div className="flex items-center justify-between gap-4 pb-4 border-b border-[var(--color-divider)]">
+              <div>
+                <div className="flex items-center gap-3">
+                  <h1 className="font-['Caprasimo',serif] text-[32px] md:text-[44px] text-[var(--color-ink,#201e1d)] leading-tight">
+                    Your basket
+                  </h1>
+                  <span className="text-[16px] md:text-[18px] font-bold text-[var(--color-neutral-700,#645c50)]">
+                    ({totalItems} {totalItems === 1 ? "item" : "items"})
+                  </span>
+                </div>
+                {planStatusTag && (
+                  <div className="mt-1">
+                    <Tag tone="sage">{planStatusTag}</Tag>
+                  </div>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setConfirmClearOpen(true)}
+                className="text-[13px] md:text-[14px] font-bold text-[var(--color-terracotta-700,#8c491a)] hover:text-[var(--color-terracotta-900,#4a2107)] p-2 rounded-lg transition-colors cursor-pointer"
+              >
+                Clear basket
+              </button>
+            </div>
+
+            {/* Rows List */}
+            <div className="divide-y divide-[var(--color-divider)]">
+              {entries.map(({ product, quantity }) => {
+                const tags = getTags(product, 1);
+                return (
+                  <BasketRow
+                    key={product.id}
+                    product={product}
+                    qty={quantity}
+                    reason={tags[0]}
+                    variant="page"
+                    onQtyChange={(newQty) => {
+                      if (newQty === 0) {
+                        handleRemoveItem(product, quantity);
+                      } else {
+                        setQty(product.id, newQty);
+                      }
+                    }}
+                    onRemove={() => handleRemoveItem(product, quantity)}
+                  />
+                );
+              })}
+            </div>
+
+            <div className="mt-6 flex items-center justify-between">
+              <Link
+                to="/shop"
+                className="inline-flex items-center gap-2 text-[14px] font-semibold text-[var(--color-terracotta-700,#8c491a)] hover:underline"
+              >
+                <ArrowLeft size={16} />
+                Continue shopping
+              </Link>
+            </div>
+          </div>
+
+          {/* Right Column: Summary Card */}
+          <div className="rounded-[40px] bg-[var(--color-neutral-100,#f9f4ed)] border border-[var(--color-divider)] p-6 md:p-8 shadow-sm flex flex-col gap-6 sticky top-24">
+            <div>
+              <div className="text-[13px] font-bold uppercase tracking-wider text-[var(--color-neutral-700,#645c50)] mb-1">
+                Total
+              </div>
+              <div className="font-['Caprasimo',serif] text-[44px] md:text-[52px] text-[var(--color-ink,#201e1d)] leading-none">
+                {formatPrice(totalCost)}
+              </div>
+            </div>
+
+            {/* Budget Meter (if budget configured) */}
+            {budget > 0 && (
+              <div className="flex flex-col gap-2 pt-4 border-t border-[var(--color-neutral-300,#ded5c3)]">
+                <div className="flex justify-between items-center text-[14px] font-bold">
+                  <span className="text-[var(--color-ink,#201e1d)]">
+                    Budget: {formatPrice(budget)}
+                  </span>
+                  <span
+                    className={
+                      underBudget >= 0
+                        ? "text-[var(--color-sage-800,#3d472b)]"
+                        : "text-[var(--color-terracotta-700,#8c491a)]"
+                    }
+                  >
+                    {underBudget >= 0
+                      ? `${formatPrice(underBudget)} under plan`
+                      : `${formatPrice(Math.abs(underBudget))} over plan`}
+                  </span>
+                </div>
+                <div className="w-full h-3 bg-[var(--color-neutral-200,#eee7db)] rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-300 ${
+                      totalCost <= budget
+                        ? "bg-[var(--color-sage-700,#56633f)]"
+                        : "bg-[var(--color-terracotta-700,#8c491a)]"
+                    }`}
+                    style={{ width: `${Math.min(100, Math.round(budgetRatio * 100))}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Profile Health Fit Summary */}
+            {fitBreakdown && (
+              <div className="p-3.5 rounded-2xl bg-[var(--color-surface,#ebddc5)] text-[13px] font-semibold text-[var(--color-ink,#201e1d)] flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-sage-700,#56633f)] shrink-0" />
+                <span>
+                  {fitBreakdown.allFit
+                    ? `All ${entries.length} items fit your ${profile.condition} targets.`
+                    : `${fitBreakdown.fitsCount} items fit; ${fitBreakdown.misfitCount} outside ${profile.condition} limits.`}
+                </span>
+              </div>
+            )}
+
+            {/* Export Action */}
+            <div className="flex flex-col gap-3 pt-2">
+              <Button
+                variant="basket"
+                size="lg"
+                className="w-full"
+                onClick={handleExport}
+                aria-label="Export shopping list to PDF"
+              >
+                <FileDown size={19} strokeWidth={2.75} />
+                Export shopping list (PDF)
+              </Button>
+
+              <Link
+                to="/"
+                className="text-center text-[13px] font-semibold text-[var(--color-neutral-700,#645c50)] hover:text-[var(--color-ink,#201e1d)] transition-colors py-1"
+              >
+                Back to my plan
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Confirmation Dialog for Clear Basket */}
+      <ConfirmDialog
+        isOpen={confirmClearOpen}
+        title="Clear your basket?"
+        description={`This removes all ${totalItems} items. Your profile and plan settings will stay intact.`}
+        confirmLabel="Clear basket"
+        cancelLabel="Keep items"
+        isDestructive={true}
+        onConfirm={handleConfirmClear}
+        onCancel={() => setConfirmClearOpen(false)}
+      />
+    </AppLayout>
+  );
 }
