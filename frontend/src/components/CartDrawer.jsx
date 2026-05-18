@@ -1,71 +1,210 @@
+import React, { useEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { X, ShoppingBasket, FileDown, ArrowRight } from "lucide-react";
 import { useCart } from "../store/cartContext";
-import { Link } from "react-router-dom";
+import { useProfile } from "../store/ProfileContext";
+import BasketRow from "./BasketRow";
+import { Button, EmptyState } from "./ui";
+import { formatPrice } from "../utils/formatPrice";
+import { exportCartPdf } from "../utils/exportPDF";
 
 export default function CartDrawer({ open, onClose }) {
-	const { entries, totalItems, totalCost, setQty } = useCart();
+  const navigate = useNavigate();
+  const { entries, totalItems, totalCost, setQty } = useCart();
+  const { profile, evaluateProduct, getTags } = useProfile();
 
-	// Don't render anything if cart is empty and drawer isn't open.
-	if (!open) return null;
+  const drawerRef = useRef(null);
+  const previouslyFocusedElementRef = useRef(null);
 
-	return (
-		<>
-			{/* Overlay - clicking it closes the drawer */}
-			<div
-				onClick={onClose}
-				className="fixed inset-0 z-40 bg-black/50"
-			/>
-			{/* Drawer panel */}
-			<div className="fixed top-0 right-0 z-50 h-full w-80 bg-surface border-l border-border shadow-soft flex flex-col">
-				<div className="flex items-center justify-between p-4 border-b border-border">
-					<h2 className="text-lg font-bold">Cart ({totalItems})</h2>
-					<button onClick={onClose} className="text-muted text-xl">✕</button>
-				</div>
+  // Focus trapping and Esc key listener
+  useEffect(() => {
+    if (open) {
+      previouslyFocusedElementRef.current = document.activeElement;
+      // Focus drawer panel on open
+      drawerRef.current?.focus();
 
-				{totalItems === 0 ? (
-					<p className="p-4 text-muted text-sm">Your cart is empty.</p>
-				) : (
-					<>
-						{/* Scrollable item list */}
-						<div className="flex-1 overflow-y-auto p-4 space-y-3">
-							{entries.map((e) => (
-								<div key={e.product.id} className="flex items-center gap-3">
-									<img
-										src={e.product.image_url}
-										alt={e.product.name}
-										className="w-12 h-12 rounded-lg object-cover bg-card"
-									/>
-									<div className="flex-1 min-w-0">
-										<div className="text-sm font-semibold truncate">{e.product.name}</div>
-										<div className="text-xs text-muted">x{e.quantity} · ₹{e.product.price_per_unit * e.quantity}</div>
-									</div>
-									<div className="flex items-center gap-1">
-										<button onClick={() => setQty(e.product.id, e.quantity - 1)}
-											className="w-6 h-6 rounded-full bg-card border border-border text-xs">−</button>
-										<span className="text-xs w-4 text-center">{e.quantity}</span>
-										<button onClick={() => setQty(e.product.id, e.quantity + 1)}
-											className="w-6 h-6 rounded-full bg-card border border-border text-xs">+</button>
-									</div>
-								</div>
-							))}
-						</div>
+      const handleKeyDown = (e) => {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          onClose();
+        }
+      };
 
-						{/* Footer with total and CTA */}
-						<div className="p-4 border-t border-border">
-							<div className="flex justify-between mb-3 font-bold">
-								<span>Total</span>
-								<span>₹{totalCost}</span>
-							</div>
-							<Link
-								to="/cart"
-								onClick={onClose}
-								className="block w-full text-center py-3 rounded-xl bg-accent text-black font-bold"
-							>
-								Go to Cart
-							</Link>
-						</div>
-					</>
-				)}
-			</div>
-		</>
-	);
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    } else if (previouslyFocusedElementRef.current) {
+      previouslyFocusedElementRef.current.focus?.();
+    }
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  // Fit count calculation for prompt card
+  const fitCount = profile.condition
+    ? entries.filter(({ product }) => evaluateProduct(product).fits).length
+    : entries.length;
+
+  const handleExport = () => {
+    try {
+      exportCartPdf(entries, totalCost, profile);
+      onClose();
+    } catch (err) {
+      console.error("PDF export failed:", err);
+    }
+  };
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Shopping Basket Drawer"
+      className="fixed inset-0 z-50 flex justify-end"
+    >
+      {/* Backdrop */}
+      <div
+        onClick={onClose}
+        className="fixed inset-0 bg-black/45 backdrop-blur-[2px] transition-opacity duration-240"
+      />
+
+      {/* Slide-over Drawer Panel */}
+      <div
+        ref={drawerRef}
+        tabIndex={-1}
+        className="relative z-10 m-3 w-[440px] max-w-[calc(100vw-24px)] h-[calc(100vh-24px)] rounded-[36px] bg-[var(--color-ground,#f5ead8)] border border-[var(--color-divider)] shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-240 focus:outline-none"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-divider)]">
+          <div className="flex items-center gap-2.5">
+            <h2 className="font-['Caprasimo',serif] text-[26px] md:text-[28px] text-[var(--color-ink,#201e1d)]">
+              Basket
+            </h2>
+            {totalItems > 0 && (
+              <span className="min-w-[24px] h-[24px] px-2 rounded-full bg-[var(--color-terracotta-700,#8c491a)] text-[var(--color-ground,#f5ead8)] text-[12px] font-bold flex items-center justify-center">
+                {totalItems}
+              </span>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close basket drawer"
+            className="w-11 h-11 rounded-full bg-[var(--color-surface,#ebddc5)] border border-[var(--color-divider)] flex items-center justify-center text-[var(--color-ink,#201e1d)] hover:bg-[color-mix(in_srgb,var(--color-ink,#201e1d)_8%,transparent)] transition-colors cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-terracotta-500)]"
+          >
+            <X size={18} strokeWidth={2.5} />
+          </button>
+        </div>
+
+        {/* Content Area */}
+        {totalItems === 0 ? (
+          <div className="flex-1 flex items-center justify-center p-6 text-center">
+            <EmptyState
+              tone="sage"
+              icon={<ShoppingBasket size={28} strokeWidth={2.5} />}
+              title="Your basket is empty"
+              body="Add healthy groceries from the shop or let our kitchen planner build a balanced basket."
+              primaryAction={
+                <Button
+                  variant="plan"
+                  size="sm"
+                  onClick={() => {
+                    onClose();
+                    navigate("/");
+                  }}
+                >
+                  Plan a basket
+                </Button>
+              }
+              secondaryAction={
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    onClose();
+                    navigate("/shop");
+                  }}
+                >
+                  Browse shop
+                </Button>
+              }
+            />
+          </div>
+        ) : (
+          <div className="flex-1 overflow-y-auto px-6 py-2 divide-y divide-[var(--color-divider)]">
+            {entries.map(({ product, quantity }) => {
+              const tags = getTags(product, 1);
+              return (
+                <BasketRow
+                  key={product.id}
+                  product={product}
+                  qty={quantity}
+                  reason={tags[0]}
+                  variant="compact"
+                  removable={false}
+                  onQtyChange={(newQty) => setQty(product.id, newQty)}
+                />
+              );
+            })}
+
+            {/* Planner prompt card if no plan active */}
+            {profile.condition && profile.budget && (
+              <div className="my-4 p-4 rounded-2xl bg-[var(--color-sage-100,#f0fae1)] border border-[var(--color-sage-300,#ccdbb2)] text-[13px] text-[var(--color-sage-900,#272e1b)] flex flex-col gap-2">
+                <div className="font-bold">
+                  {fitCount} of {entries.length} items fit your {profile.condition} targets
+                </div>
+                <p className="text-[var(--color-sage-800,#3d472b)]">
+                  Want the planner to balance the rest of your ₹{profile.budget} budget?
+                </p>
+                <Link
+                  to="/"
+                  onClick={onClose}
+                  className="font-bold text-[var(--color-sage-900,#272e1b)] hover:underline inline-flex items-center gap-1.5"
+                >
+                  Plan around these <ArrowRight size={14} />
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Pinned Footer */}
+        {totalItems > 0 && (
+          <div className="px-6 py-4 border-t border-[var(--color-divider)] bg-[var(--color-surface,#ebddc5)] flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[14px] font-bold text-[var(--color-neutral-700,#645c50)] uppercase tracking-wider">
+                Total
+              </span>
+              <span className="font-['Caprasimo',serif] text-[28px] md:text-[30px] text-[var(--color-ink,#201e1d)]">
+                {formatPrice(totalCost)}
+              </span>
+            </div>
+
+            <Button
+              variant="basket"
+              size="lg"
+              className="w-full"
+              onClick={() => {
+                onClose();
+                navigate("/cart");
+              }}
+            >
+              View basket ({totalItems})
+            </Button>
+
+            <Button
+              variant="secondary"
+              size="md"
+              className="w-full"
+              onClick={handleExport}
+            >
+              <FileDown size={17} strokeWidth={2.5} />
+              Export PDF
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
