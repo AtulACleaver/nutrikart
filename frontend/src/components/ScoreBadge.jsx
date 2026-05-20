@@ -1,15 +1,20 @@
-// Color-coded score pill for recommendation items.
-// Score thresholds: 80+ green, 60+ lime, 40+ amber, below 40 red.
-// Maps directly to the score100 value from POST /recommend response.
-export default function ScoreBadge({ score }) {
-	let color = "bg-red-500";
-	if (score >= 80) color = "bg-green-500";
-	else if (score >= 60) color = "bg-lime-500";
-	else if (score >= 40) color = "bg-amber-500";
+import React from "react";
 
-	return (
-		<span className={`${color} text-black text-xs font-bold px-2 py-1 rounded-full`}>
-			{score}
-		</span>
-	);
+// Color-coded score pill for recommendation items adhering to Organic palette tokens.
+// Score thresholds: 80+ sage-700, 60+ sage-600, 40+ neutral-600, below 40 terracotta-700.
+export default function ScoreBadge({ score }) {
+  let styleClass = "bg-[var(--color-terracotta-700,#8c491a)] text-[#fff2eb]";
+  if (score >= 80) {
+    styleClass = "bg-[var(--color-sage-700,#56633f)] text-[#f0fae1]";
+  } else if (score >= 60) {
+    styleClass = "bg-[var(--color-sage-800,#3d472b)] text-[#f0fae1]";
+  } else if (score >= 40) {
+    styleClass = "bg-[var(--color-neutral-700,#645c50)] text-[#f9f4ed]";
+  }
+
+  return (
+    <span className={`${styleClass} text-[11px] font-bold px-2 py-0.5 rounded-full`}>
+      {score}
+    </span>
+  );
 }

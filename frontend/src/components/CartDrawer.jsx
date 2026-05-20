@@ -65,7 +65,7 @@ export default function CartDrawer({ open, onClose }) {
       {/* Backdrop */}
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-black/45 backdrop-blur-[2px] transition-opacity duration-240"
+        className="fixed inset-0 bg-[color-mix(in_srgb,var(--color-ink,#201e1d)_45%,transparent)] backdrop-blur-[2px] transition-opacity duration-240"
       />
 
       {/* Slide-over Drawer Panel */}
