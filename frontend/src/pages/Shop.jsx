@@ -89,12 +89,9 @@ export default function Shop() {
         {/* Header & Search */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="font-['Caprasimo',serif] text-[32px] md:text-[38px] text-[var(--color-ink,#201e1d)] leading-tight">
-              Grocery Catalogue
+            <h1 className="font-['Caprasimo',serif] text-[28px] md:text-[34px] text-[var(--color-ink,#201e1d)] leading-tight">
+              Grocery Shop
             </h1>
-            <p className="text-[14px] text-[var(--color-neutral-700,#645c50)]">
-              Explore verified nutritional data and real local grocery offerings.
-            </p>
           </div>
 
           {/* Search Input */}
@@ -125,13 +122,14 @@ export default function Shop() {
 
         {/* Profile Filter Status Banner */}
         {profile.condition && evaluationStats && (
-          <div className="p-4 rounded-2xl bg-[var(--color-sage-100,#f0fae1)] border border-[var(--color-sage-300,#ccdbb2)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[14px]">
+          <div className="p-3.5 px-4 rounded-2xl bg-[var(--color-sage-100,#f0fae1)] border border-[var(--color-sage-300,#ccdbb2)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[14px]">
             <div className="flex items-center gap-2 flex-wrap text-[var(--color-sage-900,#272e1b)]">
               <span className="font-bold">
                 Filtered by {profile.condition === "diabetic" ? "Diabetic-Friendly" : profile.condition === "hypertension" ? "Hypertension-Conscious" : "Weight Management"}:
               </span>
               <span>
-                <strong>{evaluationStats.fit}</strong> verified fits • <strong>{evaluationStats.misfit}</strong> outside limits • <strong>{evaluationStats.unknown}</strong> unknown
+                <strong>{evaluationStats.fit}</strong> verified fits
+                {evaluationStats.misfit > 0 && ` • ${evaluationStats.misfit} outside limits`}
               </span>
             </div>
 
@@ -142,7 +140,7 @@ export default function Shop() {
                 onChange={(e) => setShowAll(e.target.checked)}
                 className="accent-[var(--color-sage-700,#56633f)] w-4 h-4 cursor-pointer"
               />
-              <span>Show everything</span>
+              <span>Show all items</span>
             </label>
           </div>
         )}

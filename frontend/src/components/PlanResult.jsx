@@ -151,12 +151,9 @@ export function PlanResult({ result, onEditPlan }) {
       {/* RIGHT COLUMN: Summary Card & Commitment CTA */}
       <div className="w-full lg:w-[360px] shrink-0 sticky top-6 bg-[var(--color-ground,#f5ead8)] rounded-[36px] border border-[var(--color-divider)] p-6 md:p-8 shadow-md flex flex-col gap-6">
         <div>
-          <h3 className="font-['Caprasimo',serif] text-[22px] text-[var(--color-ink,#201e1d)] mb-1">
+          <h3 className="font-['Caprasimo',serif] text-[20px] text-[var(--color-ink,#201e1d)]">
             Basket Summary
           </h3>
-          <p className="text-[13px] text-[var(--color-neutral-700,#645c50)]">
-            Budget adherence across planned and cart items
-          </p>
         </div>
 
         {/* Budget Progress Meter */}
@@ -222,7 +219,7 @@ export function PlanResult({ result, onEditPlan }) {
         {/* Add All to Basket CTA */}
         <Button
           variant="basket"
-          size="xl"
+          size="lg"
           disabled={previewItems.length === 0}
           onClick={handleCommitToBasket}
           className="w-full"
@@ -230,13 +227,10 @@ export function PlanResult({ result, onEditPlan }) {
           <ShoppingBasket size={18} strokeWidth={2.75} />
           Add all to basket
         </Button>
-
-        <p className="text-[11px] text-[var(--color-neutral-700,#645c50)] text-center leading-tight">
-          Quantities will merge into your active basket with undo availability.
-        </p>
       </div>
     </div>
   );
 }
 
 export default PlanResult;
+

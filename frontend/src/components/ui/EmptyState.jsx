@@ -25,20 +25,20 @@ export function EmptyState({
     >
       {IconComponent && (
         <div
-          className={`w-[96px] h-[96px] rounded-full flex items-center justify-center mb-6 shrink-0 ${toneClass}`}
+          className={`w-[64px] h-[64px] rounded-full flex items-center justify-center mb-4 shrink-0 ${toneClass}`}
         >
           {IconComponent}
         </div>
       )}
 
       {title && (
-        <h3 className="font-['Caprasimo',serif] text-[28px] md:text-[30px] text-[var(--color-ink,#201e1d)] leading-tight mb-3">
+        <h3 className="font-['Caprasimo',serif] text-[22px] md:text-[24px] text-[var(--color-ink,#201e1d)] leading-tight mb-2">
           {title}
         </h3>
       )}
 
       {body && (
-        <p className="text-[15px] md:text-[16px] text-[var(--color-neutral-800,#474238)] leading-relaxed mb-6">
+        <p className="text-[14px] md:text-[15px] text-[var(--color-neutral-800,#474238)] leading-relaxed mb-5">
           {body}
         </p>
       )}
@@ -54,3 +54,4 @@ export function EmptyState({
 }
 
 export default EmptyState;
+

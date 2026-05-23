@@ -11,6 +11,7 @@ export function AppHeader({ onCartClick }) {
 
   const isPlanActive = currentPath === '/';
   const isShopActive = currentPath === '/shop';
+  const isHowItWorksActive = currentPath === '/how-it-works';
 
   return (
     <header className="w-full bg-[var(--color-ground,#f5ead8)] border-b border-[var(--color-divider)] md:border-none">
@@ -47,12 +48,16 @@ export function AppHeader({ onCartClick }) {
           >
             Shop
           </Link>
-          <a
-            href="/#how-it-works"
-            className="pb-1 text-[var(--color-ink,#201e1d)] hover:text-[var(--color-sage-700,#56633f)] transition-colors"
+          <Link
+            to="/how-it-works"
+            className={`pb-1 transition-colors ${
+              isHowItWorksActive
+                ? 'text-[var(--color-sage-800,#3d472b)] shadow-[inset_0_-2px_0_var(--color-sage-700,#56633f)]'
+                : 'text-[var(--color-ink,#201e1d)] hover:text-[var(--color-sage-700,#56633f)]'
+            }`}
           >
             How it works
-          </a>
+          </Link>
         </nav>
 
         {/* Right Actions */}

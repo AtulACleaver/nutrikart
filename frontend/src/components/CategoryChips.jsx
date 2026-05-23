@@ -6,7 +6,7 @@ export default function CategoryChips({ categories = [], activeId, onSelect }) {
     <div
       role="tablist"
       aria-label="Product categories"
-      className="flex gap-2.5 overflow-x-auto pb-3 pt-1 scrollbar-none"
+      className="flex items-center gap-2.5 overflow-x-auto pb-2 pt-1 scrollbar-none no-scrollbar flex-nowrap"
     >
       <Chip
         selected={activeId === null}

@@ -28,11 +28,35 @@ export function QtyStepper({
     }
   };
 
-  const btnSize = size === 'sm' ? 'w-[36px] h-[36px]' : 'w-[44px] h-[44px]';
+  const config = {
+    sm: {
+      btn: 'w-[28px] h-[28px]',
+      icon: 13,
+      num: 'min-w-[18px] text-[13px]',
+      container: 'p-0.5 gap-1',
+    },
+    md: {
+      btn: 'w-[32px] h-[32px]',
+      icon: 14,
+      num: 'min-w-[22px] text-[14px]',
+      container: 'p-0.5 gap-1.5',
+    },
+    lg: {
+      btn: 'w-[38px] h-[38px]',
+      icon: 16,
+      num: 'min-w-[26px] text-[15px]',
+      container: 'p-1 gap-2',
+    },
+  }[size] || {
+    btn: 'w-[30px] h-[30px]',
+    icon: 13,
+    num: 'min-w-[20px] text-[13px]',
+    container: 'p-0.5 gap-1',
+  };
 
   return (
     <div
-      className={`inline-flex items-center gap-2 p-1 rounded-full bg-[var(--color-surface,#ebddc5)] select-none ${className}`}
+      className={`inline-flex items-center rounded-full bg-[var(--color-surface,#ebddc5)] select-none shrink-0 ${config.container} ${className}`}
       role="group"
       aria-label={ariaLabel}
     >
@@ -41,14 +65,14 @@ export function QtyStepper({
         aria-label="Decrease quantity"
         disabled={disabled || isMin}
         onClick={handleDecrement}
-        className={`inline-flex items-center justify-center rounded-full bg-[var(--color-ground,#f5ead8)] text-[var(--color-ink,#201e1d)] transition-colors hover:bg-[var(--color-neutral-100,#f9f4ed)] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${btnSize}`}
+        className={`inline-flex items-center justify-center rounded-full bg-[var(--color-ground,#f5ead8)] text-[var(--color-ink,#201e1d)] transition-colors hover:bg-[var(--color-neutral-100,#f9f4ed)] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${config.btn}`}
       >
-        <Minus size={16} strokeWidth={2.75} />
+        <Minus size={config.icon} strokeWidth={2.5} />
       </button>
 
       <span
         aria-live="polite"
-        className="min-w-[28px] text-center font-bold text-[16px] text-[var(--color-ink,#201e1d)]"
+        className={`text-center font-semibold text-[var(--color-ink,#201e1d)] ${config.num}`}
       >
         {value}
       </span>
@@ -58,12 +82,13 @@ export function QtyStepper({
         aria-label="Increase quantity"
         disabled={disabled || isMax}
         onClick={handleIncrement}
-        className={`inline-flex items-center justify-center rounded-full bg-[var(--color-ground,#f5ead8)] text-[var(--color-ink,#201e1d)] transition-colors hover:bg-[var(--color-neutral-100,#f9f4ed)] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${btnSize}`}
+        className={`inline-flex items-center justify-center rounded-full bg-[var(--color-ground,#f5ead8)] text-[var(--color-ink,#201e1d)] transition-colors hover:bg-[var(--color-neutral-100,#f9f4ed)] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${config.btn}`}
       >
-        <Plus size={16} strokeWidth={2.75} />
+        <Plus size={config.icon} strokeWidth={2.5} />
       </button>
     </div>
   );
 }
 
 export default QtyStepper;
+

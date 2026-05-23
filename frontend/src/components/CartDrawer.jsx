@@ -1,17 +1,18 @@
 import React, { useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { X, ShoppingBasket, FileDown, ArrowRight } from "lucide-react";
+import { X, ShoppingBasket, FileDown, ArrowRight, Trash2 } from "lucide-react";
 import { useCart } from "../store/cartContext";
 import { useProfile } from "../store/ProfileContext";
 import BasketRow from "./BasketRow";
-import { Button, EmptyState } from "./ui";
+import { Button, EmptyState, useToast } from "./ui";
 import { formatPrice } from "../utils/formatPrice";
 import { exportCartPdf } from "../utils/exportPDF";
 
 export default function CartDrawer({ open, onClose }) {
   const navigate = useNavigate();
-  const { entries, totalItems, totalCost, setQty } = useCart();
+  const { entries, totalItems, totalCost, setQty, clear, add } = useCart();
   const { profile, evaluateProduct, getTags } = useProfile();
+  const { showToast } = useToast();
 
   const drawerRef = useRef(null);
   const previouslyFocusedElementRef = useRef(null);
@@ -46,6 +47,19 @@ export default function CartDrawer({ open, onClose }) {
     ? entries.filter(({ product }) => evaluateProduct(product).fits).length
     : entries.length;
 
+  const handleClearBasket = () => {
+    const savedEntries = [...entries];
+    clear();
+    showToast("Basket cleared", {
+      actionLabel: "Undo",
+      onAction: () => {
+        savedEntries.forEach(({ product, quantity }) => {
+          add(product, quantity);
+        });
+      },
+    });
+  };
+
   const handleExport = () => {
     try {
       exportCartPdf(entries, totalCost, profile);
@@ -77,24 +91,38 @@ export default function CartDrawer({ open, onClose }) {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-divider)]">
           <div className="flex items-center gap-2.5">
-            <h2 className="font-['Caprasimo',serif] text-[26px] md:text-[28px] text-[var(--color-ink,#201e1d)]">
+            <h2 className="font-['Caprasimo',serif] text-[22px] md:text-[24px] text-[var(--color-ink,#201e1d)]">
               Basket
             </h2>
             {totalItems > 0 && (
-              <span className="min-w-[24px] h-[24px] px-2 rounded-full bg-[var(--color-terracotta-700,#8c491a)] text-[var(--color-ground,#f5ead8)] text-[12px] font-bold flex items-center justify-center">
+              <span className="min-w-[22px] h-[22px] px-2 rounded-full bg-[var(--color-terracotta-700,#8c491a)] text-[var(--color-ground,#f5ead8)] text-[11px] font-bold flex items-center justify-center">
                 {totalItems}
               </span>
             )}
           </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close basket drawer"
-            className="w-11 h-11 rounded-full bg-[var(--color-surface,#ebddc5)] border border-[var(--color-divider)] flex items-center justify-center text-[var(--color-ink,#201e1d)] hover:bg-[color-mix(in_srgb,var(--color-ink,#201e1d)_8%,transparent)] transition-colors cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-terracotta-500)]"
-          >
-            <X size={18} strokeWidth={2.5} />
-          </button>
+          <div className="flex items-center gap-2">
+            {totalItems > 0 && (
+              <button
+                type="button"
+                onClick={handleClearBasket}
+                aria-label="Clear basket"
+                className="inline-flex items-center gap-1.5 text-[13px] font-bold text-[var(--color-terracotta-700,#8c491a)] hover:text-[var(--color-terracotta-900,#4a2107)] px-2.5 py-1.5 rounded-full hover:bg-[var(--color-terracotta-100,#fff2eb)] transition-colors cursor-pointer select-none"
+              >
+                <Trash2 size={13} strokeWidth={2.5} />
+                <span>Clear basket</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close basket drawer"
+              className="w-9 h-9 rounded-full bg-[var(--color-surface,#ebddc5)] border border-[var(--color-divider)] flex items-center justify-center text-[var(--color-ink,#201e1d)] hover:bg-[color-mix(in_srgb,var(--color-ink,#201e1d)_8%,transparent)] transition-colors cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-terracotta-500)]"
+            >
+              <X size={16} strokeWidth={2.5} />
+            </button>
+          </div>
         </div>
 
         {/* Content Area */}

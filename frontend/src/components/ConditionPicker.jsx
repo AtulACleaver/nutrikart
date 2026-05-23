@@ -5,30 +5,26 @@ const CONDITIONS = [
   {
     id: null,
     title: 'All Foods',
-    subtitle: 'Standard Basket',
-    limits: 'Balanced catalogue without condition filtering',
-    bullets: ['Open catalogue selection', 'Optimizes for protein & fiber density', 'No heuristic exclusions'],
+    limits: 'Balanced selection without dietary restrictions',
+    bullets: ['Full catalogue selection', 'Balanced nutrition & protein', 'No dietary exclusions'],
   },
   {
     id: 'diabetic',
     title: 'Diabetic-Friendly',
-    subtitle: 'Sugar & Calorie Limits',
     limits: '≤ 5g sugar, ≤ 200 kcal per serving',
-    bullets: ['≤ 5.0g added sugar/serving', '≤ 200 kcal energy limit', 'Rewards complex fiber & protein'],
+    bullets: ['Low added sugar (≤ 5g/serving)', 'Under 200 calories per serving', 'High in complex fiber'],
   },
   {
     id: 'hypertension',
     title: 'Hypertension-Conscious',
-    subtitle: 'Sodium & Fat Limits',
     limits: '≤ 200mg sodium, ≤ 5g fat per serving',
-    bullets: ['≤ 200mg sodium/serving', '≤ 5.0g total fat/serving', 'Penalizes high-sodium preserves'],
+    bullets: ['Low sodium (≤ 200mg/serving)', 'Low saturated fat', 'Heart-healthy choices'],
   },
   {
     id: 'weight_loss',
     title: 'Weight Management',
-    subtitle: 'Calorie & Sat-Fat Limits',
     limits: '≤ 150 kcal, ≤ 3g sat-fat per serving',
-    bullets: ['≤ 150 kcal energy limit/serving', '≤ 3.0g saturated fat limit', '≤ 8.0g sugar limit per serving'],
+    bullets: ['Calorie-conscious (≤ 150 kcal)', 'Low saturated fat', 'Nutrient-dense whole foods'],
   },
 ];
 
@@ -139,27 +135,20 @@ export function ConditionPicker({
             )}
 
             <div>
-              <h4 className="font-['Caprasimo',serif] text-[18px] text-[var(--color-ink,#201e1d)] mb-1">
+              <h4 className="font-['Caprasimo',serif] text-[17px] text-[var(--color-ink,#201e1d)] mb-2">
                 {cond.title}
               </h4>
-              <p className="text-[12px] font-semibold text-[var(--color-sage-800,#3d472b)] mb-3">
-                {cond.subtitle}
-              </p>
-              <ul className="space-y-1 mb-2">
+              <ul className="space-y-1.5">
                 {cond.bullets.map((bullet, bIdx) => (
                   <li
                     key={bIdx}
-                    className="text-[12px] text-[var(--color-neutral-800,#474238)] flex items-start gap-1.5 leading-snug"
+                    className="text-[13px] text-[var(--color-neutral-800,#474238)] flex items-start gap-2 leading-snug"
                   >
-                    <span className="text-[var(--color-sage-600,#728157)] shrink-0">•</span>
+                    <span className="text-[var(--color-sage-700,#56633f)] font-bold shrink-0">•</span>
                     <span>{bullet}</span>
                   </li>
                 ))}
               </ul>
-            </div>
-
-            <div className="pt-2 border-t border-[var(--color-divider)] text-[11px] text-[var(--color-neutral-700,#645c50)] italic">
-              Basis: per serving (normalized)
             </div>
           </button>
         );
@@ -169,3 +158,4 @@ export function ConditionPicker({
 }
 
 export default ConditionPicker;
+

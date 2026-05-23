@@ -37,6 +37,15 @@ describe('Navigation and Profile Controls', () => {
 
       const shopLink = screen.getByRole('link', { name: 'Shop' });
       expect(shopLink).toBeInTheDocument();
+
+      const howItWorksLink = screen.getByRole('link', { name: 'How it works' });
+      expect(howItWorksLink).toBeInTheDocument();
+    });
+
+    it('highlights How it works link when on /how-it-works route', () => {
+      renderWithProviders(<AppHeader onCartClick={() => {}} />, { route: '/how-it-works' });
+      const howItWorksLink = screen.getByRole('link', { name: 'How it works' });
+      expect(howItWorksLink.className).toContain('text-[var(--color-sage-800,#3d472b)]');
     });
 
     it('triggers onCartClick when desktop basket button is pressed', () => {

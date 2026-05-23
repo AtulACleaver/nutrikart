@@ -6,6 +6,7 @@ import Plan from "./pages/Plan"
 import Shop from "./pages/Shop"
 import Cart from "./pages/Cart"
 import Product from "./pages/Product"
+import HowItWorks from "./pages/HowItWorks"
 
 export default function App() {
 	return (
@@ -18,6 +19,7 @@ export default function App() {
 							<Route path="/shop" element={<Shop />} />
 							<Route path="/cart" element={<Cart />} />
 							<Route path="/product/:id" element={<Product />} />
+							<Route path="/how-it-works" element={<HowItWorks />} />
 						</Routes>
 					</BrowserRouter>
 				</ToastProvider>

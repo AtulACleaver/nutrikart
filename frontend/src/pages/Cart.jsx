@@ -143,10 +143,10 @@ export default function Cart() {
             <div className="flex items-center justify-between gap-4 pb-4 border-b border-[var(--color-divider)]">
               <div>
                 <div className="flex items-center gap-3">
-                  <h1 className="font-['Caprasimo',serif] text-[32px] md:text-[44px] text-[var(--color-ink,#201e1d)] leading-tight">
+                  <h1 className="font-['Caprasimo',serif] text-[28px] md:text-[34px] text-[var(--color-ink,#201e1d)] leading-tight">
                     Your basket
                   </h1>
-                  <span className="text-[16px] md:text-[18px] font-bold text-[var(--color-neutral-700,#645c50)]">
+                  <span className="text-[15px] md:text-[16px] font-semibold text-[var(--color-neutral-700,#645c50)]">
                     ({totalItems} {totalItems === 1 ? "item" : "items"})
                   </span>
                 </div>
@@ -160,9 +160,10 @@ export default function Cart() {
               <button
                 type="button"
                 onClick={() => setConfirmClearOpen(true)}
-                className="text-[13px] md:text-[14px] font-bold text-[var(--color-terracotta-700,#8c491a)] hover:text-[var(--color-terracotta-900,#4a2107)] p-2 rounded-lg transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 text-[13px] md:text-[14px] font-bold text-[var(--color-terracotta-700,#8c491a)] hover:text-[var(--color-terracotta-900,#4a2107)] p-2 rounded-lg transition-colors cursor-pointer"
               >
-                Clear basket
+                <Trash2 size={14} strokeWidth={2.5} />
+                <span>Clear basket</span>
               </button>
             </div>
 

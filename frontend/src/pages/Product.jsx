@@ -199,12 +199,12 @@ export default function Product() {
                 )}
               </div>
 
-              <h1 className="font-['Caprasimo',serif] text-[32px] md:text-[40px] text-[var(--color-ink,#201e1d)] leading-tight tracking-tight">
+              <h1 className="font-['Caprasimo',serif] text-[26px] md:text-[32px] text-[var(--color-ink,#201e1d)] leading-tight tracking-tight">
                 {product.name}
               </h1>
 
               <div className="flex items-baseline gap-3 mt-3">
-                <span className="font-['Caprasimo',serif] text-[36px] text-[var(--color-ink,#201e1d)]">
+                <span className="font-['Caprasimo',serif] text-[28px] md:text-[30px] text-[var(--color-ink,#201e1d)]">
                   {formatPrice(product.price_per_unit)}
                 </span>
                 {per100gText && (
@@ -286,7 +286,7 @@ export default function Product() {
         {/* Related Category Recommendations */}
         {relatedProducts.length > 0 && (
           <div className="mt-16 pt-10 border-t border-[var(--color-divider)]">
-            <h2 className="font-['Caprasimo',serif] text-[24px] md:text-[28px] text-[var(--color-ink,#201e1d)] mb-6">
+            <h2 className="font-['Caprasimo',serif] text-[20px] md:text-[24px] text-[var(--color-ink,#201e1d)] mb-6">
               More {product.category_name || "similar items"}
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">

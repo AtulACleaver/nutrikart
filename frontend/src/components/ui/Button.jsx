@@ -41,14 +41,15 @@ export function Button({
       {...props}
     >
       {IconComponent && iconPosition === 'left' && (
-        <span className="shrink-0">{IconComponent}</span>
+        <span className="inline-flex shrink-0 items-center">{IconComponent}</span>
       )}
-      <span>{children}</span>
+      <span className="inline-flex items-center justify-center gap-2 [&>svg]:shrink-0">{children}</span>
       {IconComponent && iconPosition === 'right' && (
-        <span className="shrink-0">{IconComponent}</span>
+        <span className="inline-flex shrink-0 items-center">{IconComponent}</span>
       )}
     </button>
   );
 }
 
 export default Button;
+

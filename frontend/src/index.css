@@ -79,3 +79,14 @@ h1, h2, h3, h4 {
   outline: 2px solid var(--color-terracotta-500, #c67139);
   outline-offset: 2px;
 }
+
+/* Hide scrollbars on chip carousels */
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar,
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

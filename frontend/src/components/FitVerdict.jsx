@@ -20,10 +20,10 @@ export default function FitVerdict({ product, onOpenProfile }) {
           </span>
           <div>
             <div className="font-['Caprasimo',serif] text-[18px] md:text-[20px] text-[var(--color-ink,#201e1d)]">
-              Personalized health verdict
+              Health Profile
             </div>
             <p className="text-[13px] text-[var(--color-neutral-700,#645c50)]">
-              Set a dietary condition to see if this food matches your clinical targets.
+              Set your diet preference to check nutritional fit.
             </p>
           </div>
         </div>
@@ -54,10 +54,10 @@ export default function FitVerdict({ product, onOpenProfile }) {
           </span>
           <div>
             <h3 className="font-['Caprasimo',serif] text-[20px] md:text-[22px] text-[var(--color-ink,#201e1d)] leading-tight">
-              Unverified nutritional profile
+              Nutritional info pending
             </h3>
             <p className="text-[13px] text-[var(--color-neutral-700,#645c50)]">
-              Some values are incomplete or pending verification. Cannot confirm strict fit for {conditionTitle}.
+              Detailed values are being verified for this item.
             </p>
           </div>
         </div>
@@ -78,7 +78,7 @@ export default function FitVerdict({ product, onOpenProfile }) {
               Fits your {conditionTitle} profile
             </h3>
             <p className="text-[13px] text-[var(--color-sage-800,#3d472b)]">
-              All nutrient metrics are well within recommended dietary ceilings.
+              Within recommended dietary limits.
             </p>
           </div>
         </div>
@@ -127,7 +127,7 @@ export default function FitVerdict({ product, onOpenProfile }) {
             Doesn't fit {conditionTitle}
           </h3>
           <p className="text-[13px] text-[var(--color-terracotta-800,#71360f)]">
-            {misfitReason || "Exceeds standard dietary guidelines for this profile."} You can still add it manually, but our planner won't recommend it.
+            {misfitReason || "Exceeds recommended guidelines for this profile."}
           </p>
         </div>
       </div>

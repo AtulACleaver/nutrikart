@@ -28,7 +28,7 @@ export default function BasketRow({
         to={`/product/${product.id}`}
         tabIndex={-1}
         className={`rounded-full bg-[var(--color-neutral-100,#f9f4ed)] border border-[var(--color-divider)] flex items-center justify-center shrink-0 overflow-hidden hover:opacity-90 transition-opacity ${
-          compact ? "w-12 h-12" : "w-14 h-14 md:w-16 md:h-16"
+          compact ? "w-11 h-11" : "w-13 h-13 md:w-14 md:h-14"
         }`}
       >
         {!imgError && product.image_url ? (
@@ -40,23 +40,23 @@ export default function BasketRow({
             loading="lazy"
           />
         ) : (
-          <ImageOff size={compact ? 16 : 20} className="text-[var(--color-neutral-500,#9c9383)]" />
+          <ImageOff size={compact ? 16 : 18} className="text-[var(--color-neutral-500,#9c9383)]" />
         )}
       </Link>
 
       {/* Info */}
-      <div className="flex-1 flex flex-col gap-1 min-w-0 pr-2">
+      <div className="flex-1 flex flex-col gap-0.5 min-w-0 pr-1.5">
         <Link
           to={`/product/${product.id}`}
-          className={`font-semibold text-[var(--color-ink,#201e1d)] hover:text-[var(--color-terracotta-700,#8c491a)] transition-colors line-clamp-2 leading-snug ${
-            compact ? "text-[14px]" : "text-[15px] md:text-[16px]"
+          className={`font-semibold text-[var(--color-ink,#201e1d)] hover:text-[var(--color-terracotta-700,#8c491a)] transition-colors leading-snug line-clamp-2 ${
+            compact ? "text-[14px]" : "text-[15px]"
           }`}
         >
           {product.name}
         </Link>
-        <div className="flex items-center gap-2 flex-wrap">
-          {reason && <Tag tone="sage">{reason}</Tag>}
-          <span className="text-[13px] text-[var(--color-neutral-700,#645c50)] font-medium">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {reason && <Tag tone="sage" className="text-[11px] px-2 py-0">{reason}</Tag>}
+          <span className="text-[12px] text-[var(--color-neutral-700,#645c50)]">
             {formatPrice(product.price_per_unit)} each
           </span>
         </div>
@@ -66,6 +66,7 @@ export default function BasketRow({
       <div className="shrink-0">
         <QtyStepper
           value={qty}
+          size="sm"
           onChange={onQtyChange}
           aria-label={`Quantity for ${product.name}`}
         />
@@ -73,8 +74,8 @@ export default function BasketRow({
 
       {/* Line Total */}
       <div
-        className={`text-right font-bold text-[var(--color-ink,#201e1d)] shrink-0 ${
-          compact ? "w-14 text-[14px]" : "w-16 md:w-20 text-[15px] md:text-[16px]"
+        className={`text-right font-['Caprasimo',serif] font-bold text-[var(--color-ink,#201e1d)] shrink-0 ${
+          compact ? "w-16 text-[14px]" : "w-20 text-[15px]"
         }`}
       >
         {formatPrice(lineTotal)}
@@ -94,3 +95,4 @@ export default function BasketRow({
     </div>
   );
 }
+
