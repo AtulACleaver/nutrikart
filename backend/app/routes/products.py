@@ -1,11 +1,21 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
+import os
 from ..database import get_db
 from ..models import Product, Category
 from ..schemas import ProductBase, ProductResponse
 
 router = APIRouter(prefix="/products", tags=["products"])
+
+
+def require_admin(x_admin_token: Optional[str] = Header(None)):
+    admin_token = os.environ.get("ADMIN_SECRET_KEY", "nutrikart_admin_secret_key_default")
+    if not x_admin_token or x_admin_token != admin_token:
+        raise HTTPException(
+            status_code=403,
+            detail="Forbidden: Public catalogue writes are disabled without administrative authorization.",
+        )
 
 
 @router.get("/", response_model=List[ProductResponse])
@@ -41,7 +51,7 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
     return product
 
 
-@router.post("/", response_model=ProductResponse, status_code=201)
+@router.post("/", response_model=ProductResponse, status_code=201, dependencies=[Depends(require_admin)])
 def create_product(product: ProductBase, db: Session = Depends(get_db)):
     """Create a new product"""
     new_product = Product(
@@ -64,7 +74,7 @@ def create_product(product: ProductBase, db: Session = Depends(get_db)):
     return new_product
 
 
-@router.delete("/{product_id}", status_code=204)
+@router.delete("/{product_id}", status_code=204, dependencies=[Depends(require_admin)])
 def delete_product(product_id: int, db: Session = Depends(get_db)):
     """Delete a product by ID"""
     product = db.query(Product).filter(Product.id == product_id).first()

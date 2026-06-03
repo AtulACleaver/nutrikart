@@ -41,3 +41,26 @@ app.include_router(location.router)
 @app.get("/")
 def read_root():
     return {"message": "NutriKart API is Running!"}
+
+@app.get("/health")
+def healthcheck():
+    from app.services.providers import get_provider
+    from app.database import SessionLocal
+    from sqlalchemy import text
+
+    provider = get_provider()
+    db_ok = True
+    try:
+        db = SessionLocal()
+        db.execute(text("SELECT 1"))
+        db.close()
+    except Exception:
+        db_ok = False
+
+    return {
+        "status": "healthy" if db_ok else "degraded",
+        "database": "connected" if db_ok else "disconnected",
+        "provider_mode": provider.mode.value,
+        "service": "NutriKart API",
+        "version": "2.0.0",
+    }
