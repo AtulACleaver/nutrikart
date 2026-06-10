@@ -23,14 +23,17 @@ def get_products(
     category_id: int | None = None,
     db: Session = Depends(get_db),
 ):
-    """Get products, optionally filtered by category_id, with category names"""
+    """Get products, optionally filtered by category_id, with category names."""
+    # Preload categories into map once to avoid repeated DB hits
+    categories = db.query(Category).all()
+    cat_map = {c.id: c.name for c in categories}
+
     query = db.query(Product)
     if category_id:
         query = query.filter(Product.category_id == category_id)
 
-    products = query.all()
+    products = query.order_by(Product.name.asc()).all()
 
-    cat_map = {c.id: c.name for c in db.query(Category).all()}
     for p in products:
         p.category_name = cat_map.get(p.category_id)
         p.sat_fat = p.saturated_fat
