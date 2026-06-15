@@ -6,7 +6,42 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-app = FastAPI(title="NutriKart API")
+TAGS_METADATA = [
+    {
+        "name": "recommend",
+        "description": "Linear programming optimization engine that computes mathematically optimal grocery baskets under dietary constraints.",
+    },
+    {
+        "name": "products",
+        "description": "Product catalog endpoints with category relations and nutritional profiles.",
+    },
+    {
+        "name": "categories",
+        "description": "Food category taxonomies and department groupings.",
+    },
+    {
+        "name": "profile_rules",
+        "description": "Clinical condition rules, dietary thresholds, and scoring objective weights.",
+    },
+    {
+        "name": "location",
+        "description": "Quick-commerce serviceability inspection and locality verification.",
+    },
+]
+
+app = FastAPI(
+    title="NutriKart Engine API",
+    version="2.0.0",
+    description="Health-aware grocery planning, nutrient scoring, and LP budget optimization API.",
+    openapi_tags=TAGS_METADATA,
+    contact={
+        "name": "NutriKart Engineering",
+        "url": "https://github.com/nutrikart",
+    },
+    license_info={
+        "name": "MIT",
+    },
+)
 
 # A trailing slash in the Render env var blocked every request.
 # Strip whitespace, quotes, and trailing slashes so origins match accurately.
