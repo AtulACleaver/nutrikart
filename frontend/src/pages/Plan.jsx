@@ -124,7 +124,7 @@ export default function Plan() {
         <form
           ref={formRef}
           onSubmit={handleGeneratePlan}
-          className="bg-[var(--color-surface,#ebddc5)]/60 rounded-[36px] border border-[var(--color-divider)] p-6 md:p-8 shadow-sm flex flex-col gap-7 max-w-[840px] mb-12"
+          className="bg-[var(--color-surface,#ebddc5)]/60 rounded-[28px] sm:rounded-[36px] border border-[var(--color-divider)] p-4 sm:p-6 md:p-8 shadow-sm flex flex-col gap-6 sm:gap-7 max-w-[840px] mb-12"
         >
           {/* Step 1: Health Condition Selection */}
           <section aria-labelledby="condition-step-title">

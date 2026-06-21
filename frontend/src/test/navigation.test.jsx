@@ -59,11 +59,12 @@ describe('Navigation and Profile Controls', () => {
   });
 
   describe('TabBar', () => {
-    it('renders Plan, Shop and Basket navigation on mobile', () => {
+    it('renders Plan, Shop, Guide and Basket navigation on mobile', () => {
       renderWithProviders(<TabBar />, { route: '/shop' });
 
       expect(screen.getByRole('link', { name: /plan/i })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /shop/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /guide/i })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /basket/i })).toBeInTheDocument();
     });
   });

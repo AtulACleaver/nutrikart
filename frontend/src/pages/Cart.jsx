@@ -203,7 +203,7 @@ export default function Cart() {
           </div>
 
           {/* Right Column: Summary Card */}
-          <div className="rounded-[40px] bg-[var(--color-neutral-100,#f9f4ed)] border border-[var(--color-divider)] p-6 md:p-8 shadow-sm flex flex-col gap-6 sticky top-24">
+          <div className="rounded-[28px] sm:rounded-[36px] md:rounded-[40px] bg-[var(--color-neutral-100,#f9f4ed)] border border-[var(--color-divider)] p-5 sm:p-6 md:p-8 shadow-sm flex flex-col gap-5 sm:gap-6 lg:sticky lg:top-24">
             <div>
               <div className="text-[13px] font-bold uppercase tracking-wider text-[var(--color-neutral-700,#645c50)] mb-1">
                 Total

@@ -14,8 +14,8 @@ export function AppHeader({ onCartClick }) {
   const isHowItWorksActive = currentPath === '/how-it-works';
 
   return (
-    <header className="w-full bg-[var(--color-ground,#f5ead8)] border-b border-[var(--color-divider)] md:border-none">
-      <div className="max-w-[1152px] mx-auto px-5 md:px-8 lg:px-16 h-[72px] md:h-[84px] flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-30 w-full bg-[var(--color-ground,#f5ead8)]/95 backdrop-blur-md border-b border-[var(--color-divider)] transition-shadow shadow-[0_1px_3px_rgba(46,43,37,0.04)]">
+      <div className="max-w-[1152px] mx-auto px-4 sm:px-6 md:px-8 lg:px-16 h-[64px] sm:h-[72px] md:h-[80px] flex items-center justify-between gap-3 sm:gap-4">
         {/* Brand */}
         <Link to="/" className="flex items-center gap-2.5 shrink-0 focus-visible:outline rounded-lg">
           <span className="w-[36px] h-[36px] rounded-full bg-[var(--color-sage-700,#56633f)] text-[var(--color-ground,#f5ead8)] flex items-center justify-center shrink-0">

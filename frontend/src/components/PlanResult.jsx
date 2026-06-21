@@ -129,7 +129,7 @@ export function PlanResult({ result, onEditPlan }) {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4 self-end sm:self-center shrink-0">
+                <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto pl-[64px] sm:pl-0 pt-1 sm:pt-0 shrink-0">
                   <QtyStepper
                     value={item.quantity}
                     min={0}
@@ -138,7 +138,7 @@ export function PlanResult({ result, onEditPlan }) {
                     onChange={(newQty) => handleQtyChange(item.id, newQty)}
                     ariaLabel={`Quantity for ${item.name}`}
                   />
-                  <span className="font-['Caprasimo',serif] text-[17px] text-[var(--color-ink,#201e1d)] w-[70px] text-right">
+                  <span className="font-['Caprasimo',serif] text-[16px] sm:text-[17px] text-[var(--color-ink,#201e1d)] w-[70px] text-right">
                     {formatPrice(item.price_per_unit * item.quantity)}
                   </span>
                 </div>

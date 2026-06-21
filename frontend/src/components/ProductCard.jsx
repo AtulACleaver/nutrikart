@@ -91,8 +91,8 @@ export function ProductCard({ p }) {
       </div>
 
       {/* Price and Cart Stepper / Add button */}
-      <div className="flex items-center justify-between min-h-[44px] pt-1 mt-auto">
-        <span className="font-['Caprasimo',serif] text-[20px] text-[var(--color-ink,#201e1d)]">
+      <div className="flex items-center justify-between min-h-[44px] pt-1 mt-auto gap-2">
+        <span className="font-['Caprasimo',serif] text-[17px] sm:text-[20px] text-[var(--color-ink,#201e1d)] shrink-0">
           {formatPrice(p.price_per_unit)}
         </span>
 
