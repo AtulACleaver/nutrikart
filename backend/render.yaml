@@ -2,8 +2,9 @@ services:
   - type: web
     name: nutrikart-backend
     env: python
+    rootDir: backend
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    startCommand: python seed_db.py && uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: DATABASE_URL
         sync: false # Set this in Render dashboard (Supabase connection string)

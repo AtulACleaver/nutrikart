@@ -56,6 +56,27 @@ def ensure_columns():
                     c.execute(f"ALTER TABLE products ADD COLUMN {col_name} {col_type}")
             conn.commit()
             conn.close()
+    else:
+        # PostgreSQL / Supabase
+        pg_stmts = [
+            "ALTER TABLE products ADD COLUMN IF NOT EXISTS brand VARCHAR",
+            "ALTER TABLE products ADD COLUMN IF NOT EXISTS variant VARCHAR",
+            "ALTER TABLE products ADD COLUMN IF NOT EXISTS pack_quantity NUMERIC(10, 2)",
+            "ALTER TABLE products ADD COLUMN IF NOT EXISTS pack_unit VARCHAR DEFAULT 'g'",
+            "ALTER TABLE products ADD COLUMN IF NOT EXISTS serving_unit VARCHAR DEFAULT 'g'",
+            "ALTER TABLE products ADD COLUMN IF NOT EXISTS measurement_basis VARCHAR DEFAULT 'per_serving'",
+            "ALTER TABLE products ADD COLUMN IF NOT EXISTS verification_status VARCHAR DEFAULT 'verified'",
+            "ALTER TABLE products ADD COLUMN IF NOT EXISTS source_type VARCHAR DEFAULT 'seed'",
+            "ALTER TABLE products ADD COLUMN IF NOT EXISTS source_ref VARCHAR",
+            "ALTER TABLE products ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1",
+            "CREATE INDEX IF NOT EXISTS ix_products_name ON products (name)",
+        ]
+        with engine.begin() as conn:
+            for stmt in pg_stmts:
+                try:
+                    conn.execute(text(stmt))
+                except Exception as ex:
+                    print(f"PostgreSQL migration warning ({stmt}): {ex}")
 
 def seed():
     print("Ensuring tables and schema...")

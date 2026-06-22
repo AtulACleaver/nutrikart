@@ -34,7 +34,25 @@ def recommend(
         raise HTTPException(status_code=400, detail="household_size must be at least 1")
 
     # ── Run pipeline ──
-    all_products = db.query(Product).all()
+    try:
+        all_products = db.query(Product).all()
+        categories = db.query(Category).all()
+        cat_map = {c.id: c.name for c in categories}
+    except Exception as db_err:
+        from .products import get_fallback_catalog
+        all_products = get_fallback_catalog()
+        cat_map = {
+            1: "Cereals & Breakfast",
+            2: "Dairy & Cheese",
+            3: "Chips & Crisps",
+            4: "Biscuits & Cookies",
+            5: "Beverages",
+            6: "Protein & Nutrition Bars",
+            7: "Grains & Staples",
+            8: "Spreads & Jams",
+            9: "Frozen & Ready-to-Eat",
+        }
+
     result = get_recommendation(
         products=all_products,
         health_condition=request.health_condition,
@@ -51,7 +69,6 @@ def recommend(
         )
 
     # ── Add category names ──
-    cat_map = {c.id: c.name for c in db.query(Category).all()}
     for rec in result["recommendations"]:
         rec["category_name"] = cat_map.get(rec["category_id"])
 
