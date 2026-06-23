@@ -63,9 +63,11 @@ export default function CartDrawer({ open, onClose }) {
   const handleExport = () => {
     try {
       exportCartPdf(entries, totalCost, profile);
+      showToast("Shopping list downloaded");
       onClose();
     } catch (err) {
       console.error("PDF export failed:", err);
+      showToast("Could not generate PDF");
     }
   };
 

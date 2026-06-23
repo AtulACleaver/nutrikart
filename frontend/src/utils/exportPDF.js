@@ -1,5 +1,8 @@
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
+
+// Safely obtain the jsPDF constructor across both ESM and CJS bundling
+const JsPDF = jsPDF?.jsPDF || jsPDF;
 
 /**
  * Formats a date into YYYY-MM-DD.
@@ -13,7 +16,7 @@ export function getIsoDate(date = new Date()) {
 
 /**
  * Generates and downloads an organic-styled shopping list PDF.
- * @param {Array} entries - Cart entries from useCart().entries
+ * @param {Array} entries - Cart entries from useCart().entries or plan items
  * @param {number} totalCost - Total cart cost
  * @param {object|string} profileOrCondition - Profile state or condition name
  */
@@ -23,7 +26,7 @@ export function exportCartPdf(entries = [], totalCost = 0, profileOrCondition = 
       ? { condition: profileOrCondition }
       : (profileOrCondition || {});
 
-  const doc = new jsPDF("p", "mm", "a4");
+  const doc = new JsPDF("p", "mm", "a4");
   const today = new Date();
   const dateStr = today.toLocaleDateString("en-IN", {
     day: "numeric",
@@ -86,27 +89,41 @@ export function exportCartPdf(entries = [], totalCost = 0, profileOrCondition = 
     tableStartY = 48;
   }
 
-  const totalItemCount = entries.reduce((sum, e) => sum + (e.quantity || 1), 0);
+  // Calculate items and total safely
+  let totalItemCount = 0;
+  let calculatedTotal = 0;
 
-  // Item rows
-  const tableRows = entries.map((e) => [
-    e.product.name,
-    String(e.quantity),
-    `Rs. ${(e.product.price_per_unit * e.quantity).toFixed(0)}`,
-  ]);
+  const tableRows = (entries || []).map((e) => {
+    const prod = e.product || e || {};
+    const name = prod.name || "Item";
+    const qty = Number(e.quantity != null ? e.quantity : prod.quantity) || 1;
+    const price = Number(prod.price_per_unit != null ? prod.price_per_unit : prod.price) || 0;
+    const rowCost = price * qty;
 
-  doc.autoTable({
+    totalItemCount += qty;
+    calculatedTotal += rowCost;
+
+    return [
+      name,
+      String(qty),
+      `Rs. ${rowCost.toFixed(0)}`,
+    ];
+  });
+
+  const finalCost = Number(totalCost) > 0 ? Number(totalCost) : calculatedTotal;
+
+  const tableConfig = {
     startY: tableStartY,
     margin: { left: 16, right: 16 },
     head: [["ITEM", "QTY", "PRICE"]],
     body: tableRows,
-    foot: [[`Total · ${totalItemCount} items`, "", `Rs. ${Number(totalCost).toFixed(0)}`]],
+    foot: [[`Total · ${totalItemCount} items`, "", `Rs. ${finalCost.toFixed(0)}`]],
     theme: "plain",
     headStyles: {
       textColor: [100, 92, 80],
       fontSize: 9,
       fontStyle: "bold",
-      cellPadding: { top: 3, bottom: 3, left: 4, right: 4 },
+      cellPadding: { top: 3.5, bottom: 3.5, left: 4, right: 4 },
       fillColor: [238, 231, 219],
     },
     styles: {
@@ -129,7 +146,14 @@ export function exportCartPdf(entries = [], totalCost = 0, profileOrCondition = 
       cellPadding: { top: 4, bottom: 4, left: 4, right: 4 },
       fillColor: [238, 231, 219],
     },
-  });
+  };
+
+  // Call autoTable safely whether attached to prototype or standalone
+  if (typeof doc.autoTable === "function") {
+    doc.autoTable(tableConfig);
+  } else if (typeof autoTable === "function") {
+    autoTable(doc, tableConfig);
+  }
 
   // Footer: Disclaimer
   doc.setFont("helvetica", "normal");
@@ -142,6 +166,22 @@ export function exportCartPdf(entries = [], totalCost = 0, profileOrCondition = 
   );
 
   const filename = `nutrikart-list-${isoDate}.pdf`;
-  doc.save(filename);
+  try {
+    doc.save(filename);
+  } catch (err) {
+    console.warn("Direct doc.save failed, trying blob download fallback:", err);
+    if (typeof window !== "undefined" && window.document) {
+      const blob = doc.output("blob");
+      const url = window.URL.createObjectURL(blob);
+      const a = window.document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      window.document.body.appendChild(a);
+      a.click();
+      window.document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    }
+  }
+
   return filename;
 }

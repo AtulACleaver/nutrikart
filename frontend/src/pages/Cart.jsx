@@ -157,14 +157,26 @@ export default function Cart() {
                 )}
               </div>
 
-              <button
-                type="button"
-                onClick={() => setConfirmClearOpen(true)}
-                className="inline-flex items-center gap-1.5 text-[13px] md:text-[14px] font-bold text-[var(--color-terracotta-700,#8c491a)] hover:text-[var(--color-terracotta-900,#4a2107)] p-2 rounded-lg transition-colors cursor-pointer"
-              >
-                <Trash2 size={14} strokeWidth={2.5} />
-                <span>Clear basket</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleExport}
+                  className="inline-flex items-center gap-1.5 text-[13px] md:text-[14px] font-bold text-[var(--color-sage-800,#3d472b)] hover:text-[var(--color-sage-900,#272e1b)] p-2 rounded-lg transition-colors cursor-pointer"
+                  title="Export shopping list as PDF"
+                >
+                  <FileDown size={15} strokeWidth={2.5} />
+                  <span className="hidden sm:inline">Export PDF</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setConfirmClearOpen(true)}
+                  className="inline-flex items-center gap-1.5 text-[13px] md:text-[14px] font-bold text-[var(--color-terracotta-700,#8c491a)] hover:text-[var(--color-terracotta-900,#4a2107)] p-2 rounded-lg transition-colors cursor-pointer"
+                >
+                  <Trash2 size={14} strokeWidth={2.5} />
+                  <span>Clear basket</span>
+                </button>
+              </div>
             </div>
 
             {/* Rows List */}

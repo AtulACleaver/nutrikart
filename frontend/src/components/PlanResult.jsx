@@ -3,7 +3,8 @@ import { useCart } from '../store/cartContext';
 import { useToast } from './ui/Toast';
 import { Button, Tag, QtyStepper } from './ui';
 import { formatPrice } from '../utils/formatPrice';
-import { ShoppingBasket, SlidersHorizontal, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { exportCartPdf } from '../utils/exportPDF';
+import { ShoppingBasket, SlidersHorizontal, AlertTriangle, CheckCircle2, FileDown } from 'lucide-react';
 
 export function PlanResult({ result, onEditPlan }) {
   const { totalCost: existingCartCost, totalItems: existingCartItems, itemsById, mergeItems, restoreItems } = useCart();
@@ -53,6 +54,21 @@ export function PlanResult({ result, onEditPlan }) {
 
     mergeItems(previewItems);
 
+    try {
+      localStorage.setItem(
+        "nk.lastPlan",
+        JSON.stringify({
+          condition: result?.summary?.condition || result?.condition || profile?.condition || "health",
+          items: previewItems.map((item) => ({
+            product: { id: item.id, name: item.name },
+            qty: item.quantity,
+          })),
+        })
+      );
+    } catch {
+      // storage unavailable
+    }
+
     showToast({
       message: `Added ${previewItems.length} planned items to basket`,
       actionLabel: 'Undo',
@@ -61,6 +77,23 @@ export function PlanResult({ result, onEditPlan }) {
       },
       duration: 5000,
     });
+  };
+
+  const handleExportPlanPdf = () => {
+    try {
+      exportCartPdf(
+        previewItems.map((item) => ({
+          product: item,
+          quantity: item.quantity,
+        })),
+        planTotal,
+        result?.condition || result?.summary?.condition || {}
+      );
+      showToast('Planned shopping list downloaded');
+    } catch (err) {
+      console.error('Plan PDF export failed:', err);
+      showToast('Could not generate PDF');
+    }
   };
 
   return (
@@ -226,6 +259,18 @@ export function PlanResult({ result, onEditPlan }) {
         >
           <ShoppingBasket size={18} strokeWidth={2.75} />
           Add all to basket
+        </Button>
+
+        {/* Export Plan as PDF CTA */}
+        <Button
+          variant="secondary"
+          size="md"
+          disabled={previewItems.length === 0}
+          onClick={handleExportPlanPdf}
+          className="w-full"
+        >
+          <FileDown size={17} strokeWidth={2.5} />
+          Export plan (PDF)
         </Button>
       </div>
     </div>
