@@ -8,23 +8,28 @@ load_dotenv()
 
 app = FastAPI(title="NutriKart API")
 
-# In production set ALLOWED_ORIGINS to your Vercel URL, e.g.:
-#   ALLOWED_ORIGINS=https://nutrikart.vercel.app
-# Multiple origins: comma-separated. Defaults to "*" for local dev.
+# A trailing slash in the Render env var blocked every request.
+# Strip whitespace, quotes, and trailing slashes so origins match accurately.
 _raw_origins = os.getenv("ALLOWED_ORIGINS", "*")
 allowed_origins = (
-    [o.strip() for o in _raw_origins.split(",") if o.strip()]
-    if _raw_origins != "*"
+    [o.strip().strip("'\"").rstrip("/") for o in _raw_origins.split(",") if o.strip()]
+    if _raw_origins.strip().strip("'\"") != "*"
     else ["*"]
+)
+allow_origin_regex = os.getenv(
+    "ALLOWED_ORIGIN_REGEX",
+    r"https://nutrikart(-[a-z0-9-]+)?\.vercel\.app|http://(localhost|127\.0\.0\.1):\d+",
 )
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_credentials=True,
+    allow_origin_regex=allow_origin_regex,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # Include routers
 app.include_router(categories.router)
